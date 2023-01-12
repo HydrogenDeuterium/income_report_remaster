@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from decimal import Decimal
 from functools import lru_cache
-from typing import TypeVar
+from typing import Sequence, TypeVar
 
 sys_input = input
 
@@ -34,7 +34,7 @@ class BaseCategory:
     def __init__(self, name: str):
         self.name = name
     
-    def format(self):
+    def __format__(self, format_spec=''):
         return f'- {self.name}: {self.cost} | {self.budget()} '\
                f'{self.last:+} = {self.next()}{self.advice()}\n'
     
@@ -60,14 +60,17 @@ class BaseCategory:
 
 
 # 某个月的月份，外出或在校天数，在家天数
+# 不加 bound 为啥会报错捏？
 MonthOutHome = TypeVar('MonthOutHome', bound=tuple[int, int, int])
 
 
+# 子类别
 class SubCategory(BaseCategory):
     
-    def __init__(self, name, cost, last, budget_format):
+    def __init__(self, name, last, budget_format):
         super().__init__(name)
-        self.cost = cost
+        price = input(f'{self.name}:\n')
+        self.cost = Decimal(f'{price:.2f}')
         self.last = last
         self._raw = budget_format
     
@@ -96,3 +99,32 @@ class SubCategory(BaseCategory):
         calculator = rule_map[self._raw['类型']]
         ret = Decimal(f'{calculator(self._raw):.2f}')
         return ret
+
+
+# 大类别
+class Category(BaseCategory):
+    def __init__(self, name, name_last_rule: Sequence[tuple[str, Price, dict]]):
+        super().__init__(name)
+        self.subs = [SubCategory(name, last, rule) for name, last, rule in name_last_rule]
+    
+    def budget(self, *args):
+        return sum(_.budget for _ in self.subs)
+    
+    @property
+    def cost(self):
+        return sum(_.cost for _ in self.subs)
+    
+    def __format__(self, format_spec=''):
+        # 不使用下面一行的写法，为了防止报错，感觉好蠢，是我蠢还是ide蠢？：
+        # 应为类型 'list[Category]' (匹配的泛型类型 'list[_T]')，但实际为 'list[SubCategory]'
+        # base_categories=[self]+self.subs
+        base_categories: list[BaseCategory] = [self]
+        base_categories += self.subs
+        # Returns like:
+        # '''- xxx
+        # \t- sub_xxx1'''
+        # \t- sub_xxx2
+        # \t- sub_xxx3
+        # \t- sub_xxx4
+        # '''
+        return '\n\t'.join(map(format, base_categories))
