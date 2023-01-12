@@ -7,9 +7,5 @@
 /dataSources/
 /dataSources.local.xml
 
-test.*
-*.obj.md
-temp*.
-tmp*.
 __pycache__/*
 *.pyc
