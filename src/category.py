@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from decimal import Decimal
+from functools import lru_cache
 from typing import TypeVar
 
 sys_input = input
@@ -33,7 +34,6 @@ class BaseCategory:
     def __init__(self, name: str):
         self.name = name
     
-    @abstractmethod
     def format(self):
         return f'- {self.name}: {self.cost} | {self.budget()} '\
                f'{self.last:+} = {self.next()}{self.advice()}\n'
@@ -50,11 +50,49 @@ class BaseCategory:
             return ' ↓'
         return ''
     
+    def next(self):
+        return self.budget() + self.last - self.cost
+    
     # 防止 IDE 报 warning
     @abstractmethod
-    def next(self):
+    def budget(self, *args):
         pass
+
+
+# 某个月的月份，外出或在校天数，在家天数
+MonthOutHome = TypeVar('MonthOutHome', bound=tuple[int, int, int])
+
+
+class SubCategory(BaseCategory):
     
-    @abstractmethod
-    def budget(self):
-        pass
+    def __init__(self, name, cost, last, budget_format):
+        super().__init__(name)
+        self.cost = cost
+        self.last = last
+        self._raw = budget_format
+    
+    @lru_cache
+    def budget(self, day: MonthOutHome):
+        month, out, home = day
+        season = get_season(month)
+        
+        def special(rule, n=4):
+            per_day = rule['基础']
+            additional = rule.get(season)
+            if additional:
+                # additional['算法'] like: 'n+2/n' or '6-n/n', ensured safe
+                extra = additional['在校'] * eval(additional['算法'], {'n': n})
+                # print(f'[DEBUG]{self.name}费用：基础：{per_day}，额外:{extra}')
+                per_day += extra
+            return per_day * out
+        
+        rule_map = {
+            '月结': lambda rule: rule['每月'],
+            '日结': lambda rule: rule['在校'] * out + rule.get('在家', 0) * home,
+            '季节': lambda rule: rule['在校'][season] * out + rule.get('在家', 0) * home,
+            '特殊': special
+        }
+        
+        calculator = rule_map[self._raw['类型']]
+        ret = Decimal(f'{calculator(self._raw):.2f}')
+        return ret
