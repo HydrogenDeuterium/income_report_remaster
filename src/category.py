@@ -3,9 +3,8 @@ from decimal import Decimal
 from functools import lru_cache
 from typing import Sequence, TypeVar
 
-sys_input = input
-
 Price = TypeVar("Price", Decimal, float, int)
+sys_input = input
 
 
 def filter_input(*args, **kwargs) -> str:
@@ -38,6 +37,14 @@ class BaseCategory:
         return f'- {self.name}: {self.cost} | {self.budget()} '\
                f'{self.last:+} = {self.next()}{self.advice()}\n'
     
+    # 防止 IDE 报 warning
+    @abstractmethod
+    def budget(self, *args):
+        pass
+    
+    def next(self):
+        return self.budget() + self.last - self.cost
+    
     def advice(self) -> str:
         # 结转绝对值较小;不加下划线 IDE 会 warning
         if abs(next_ := self.next()) <= self.cost:
@@ -49,14 +56,6 @@ class BaseCategory:
         if next_ < self.last < 0:
             return ' ↓'
         return ''
-    
-    def next(self):
-        return self.budget() + self.last - self.cost
-    
-    # 防止 IDE 报 warning
-    @abstractmethod
-    def budget(self, *args):
-        pass
 
 
 # 某个月的月份，外出或在校天数，在家天数
@@ -66,13 +65,16 @@ MonthOutHome = TypeVar('MonthOutHome', bound=tuple[int, int, int])
 
 # 子类别
 class SubCategory(BaseCategory):
-    
-    def __init__(self, name, last, budget_format):
+    def __init__(self, name, last, rule):
         super().__init__(name)
         price = input(f'{self.name}:\n')
         self.cost = Decimal(f'{price:.2f}')
         self.last = last
-        self._raw = budget_format
+        # budget 计算 rule
+        self.rule = rule
+    
+    def __repr__(self):
+        return f'<Subcategory: {self.name}: {self.cost} | {self.last:+} >'
     
     @lru_cache
     def budget(self, day: MonthOutHome):
@@ -96,8 +98,8 @@ class SubCategory(BaseCategory):
             '特殊': special
         }
         
-        calculator = rule_map[self._raw['类型']]
-        ret = Decimal(f'{calculator(self._raw):.2f}')
+        calculator = rule_map[self.rule['类型']]
+        ret = Decimal(f'{calculator(self.rule):.2f}')
         return ret
 
 
@@ -107,6 +109,9 @@ class Category(BaseCategory):
         super().__init__(name)
         self.subs = [SubCategory(name, last, rule) for name, last, rule in name_last_rule]
     
+    def __repr__(self):
+        return f'<Category: {self.name}: {[sub.name for sub in self.subs]}>'
+    
     def budget(self, *args):
         return sum(_.budget for _ in self.subs)
     
@@ -114,12 +119,17 @@ class Category(BaseCategory):
     def cost(self):
         return sum(_.cost for _ in self.subs)
     
+    def format(self):
+        return BaseCategory.__format__(self)
+    
     def __format__(self, format_spec=''):
-        # 不使用下面一行的写法，为了防止报错，感觉好蠢，是我蠢还是ide蠢？：
+        # 不使用下面一行的写法，为了防止报错，感觉好蠢，是我蠢还是 IDE 蠢？我觉得是 IDE：
         # 应为类型 'list[Category]' (匹配的泛型类型 'list[_T]')，但实际为 'list[SubCategory]'
-        # base_categories=[self]+self.subs
+        # 应为类型 'Iterable[str]' (匹配的泛型类型 'Iterable[_T1]')，但实际为 'list[SubCategory]'
+        base_categories=[self]+self.subs
         base_categories: list[BaseCategory] = [self]
         base_categories += self.subs
+        return '\n\t'.join(map(BaseCategory.__format__, base_categories))
         # Returns like:
         # '''- xxx
         # \t- sub_xxx1'''
@@ -127,4 +137,4 @@ class Category(BaseCategory):
         # \t- sub_xxx3
         # \t- sub_xxx4
         # '''
-        return '\n\t'.join(map(format, base_categories))
+        # return self.format() + '\n\t' + '\n\t'.join(map(format, self.subs))
