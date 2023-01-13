@@ -5,4 +5,6 @@ test.*
 *.obj.md
 temp*.
 tmp*.
-
+pdate
+/htmlReport/
+/测试结果 -.html
