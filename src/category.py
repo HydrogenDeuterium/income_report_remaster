@@ -3,8 +3,7 @@ import pytest
 
 from abc import abstractmethod
 from decimal import Decimal
-from functools import lru_cache
-from typing import Sequence, TypeVar
+from typing import Sequence, TypeAlias, TypeVar
 
 Price = TypeVar("Price", Decimal, float, int)
 
@@ -41,8 +40,8 @@ class BaseCategory:
         return f'- {self.name}: {self.cost} | {self.budget()} '\
                f'{self.last:+} = {self.next()}{self.advice()}\n'
     
-    # 防止 IDE 报 warning
     @pytest.mark.skipif(reason='abstract placeholder method')
+    # 防止 IDE 报 warning
     @abstractmethod
     def budget(self, *args):
         pass
@@ -72,6 +71,7 @@ MonthOutHome = TypeVar('MonthOutHome', bound=tuple[int, int, int])
 class SubCategory(BaseCategory):
     def __init__(self, name, last, rule, cost=None):
         super().__init__(name)
+        self.cache = None
         if cost is None:
             price = filter_input(f'{self.name}:\n')
             self.cost = Decimal(f'{price:.2f}')
@@ -85,7 +85,12 @@ class SubCategory(BaseCategory):
         return f'<Subcategory {self.name}: {self.cost}|{self.last:+}>'
     
     # @lru_cache
-    def budget(self, day: MonthOutHome):
+    def budget(self, day: MonthOutHome = None):
+        if not day:
+            if self.cache is None:
+                raise NameError('No cache!')
+            else:
+                return self.cache
         month, out, home = day
         season = get_season(month)
         
@@ -109,27 +114,37 @@ class SubCategory(BaseCategory):
         
         calculator = rule_map[self.rule['类型']]
         ret = Decimal(f'{calculator(self.rule):.2f}')
+        self.cache = ret
         return ret
+
+
+NameLastRuleCo: TypeAlias = tuple[str, Price, dict, Price] | tuple[str, Price, dict]
 
 
 # 大类别
 class Category(BaseCategory):
-    def __init__(self, name, name_last_rule: Sequence[tuple[str, Price, dict]]):
+    def __init__(self, name, name_last_rule: Sequence[NameLastRuleCo]):
         super().__init__(name)
-        self.subs = [SubCategory(name, last, rule) for name, last, rule in name_last_rule]
+        self.subs = [SubCategory(*name_etc) for name_etc in name_last_rule]
+        self.last = sum(_.last for _ in self.subs)
     
     def __repr__(self):
         return f'<Category: {self.name}: {[sub.name for sub in self.subs]}>'
     
     def budget(self, *args):
-        return sum(_.budget for _ in self.subs)
+        return sum(_.budget(*args) for _ in self.subs)
     
+    # 没用，但是 super.init 必须要初始化 cost 否则 warn
     @property
     def cost(self):
         return sum(_.cost for _ in self.subs)
     
-    def format(self):
-        return BaseCategory.__format__(self)
+    @cost.setter
+    def cost(self, val):
+        pass
+    
+    # def format(self):
+    #     return BaseCategory.__format__(self)
     
     def __format__(self, format_spec=''):
         base_categories: list[BaseCategory] = [self]
@@ -141,4 +156,5 @@ class Category(BaseCategory):
         # \t- sub_xxx3
         # Pycharm 有 bug，会认为 __format__() 要传入 str
         # return '\n\t'.join(map(BaseCategory.__format__, base_categories))
-        return '\n\t'.join(map(lambda x: BaseCategory.__format__(x), base_categories))
+        ret = '\t'.join(map(lambda x: BaseCategory.__format__(x), base_categories))
+        return ret

@@ -5,6 +5,7 @@
       <excludeFolder url="file://$MODULE_DIR$/2020季度总结" />
       <excludeFolder url="file://$MODULE_DIR$/2021月报" />
       <excludeFolder url="file://$MODULE_DIR$/2022月报" />
+      <excludeFolder url="file://$MODULE_DIR$/test/.pytest_cache/v" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.11" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
