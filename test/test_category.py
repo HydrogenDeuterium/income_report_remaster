@@ -1,3 +1,5 @@
+import tomllib
+
 from copy import deepcopy
 
 from src.category import *
@@ -23,7 +25,6 @@ base.budget = lambda: 456
 
 
 class TestBase:
-    
     def test_next(self):
         assert base.next() == 456 + 789 - 123
     
@@ -40,3 +41,36 @@ class TestBase:
         # 下降趋势，赤字
         b.last = -500
         assert format(b) == '- 测试: 457 | 456 -500 = -501 ↓\n'
+
+
+sub = SubCategory('测试', 132, None, 789, )
+
+
+class TestSub:
+    def test_repr(self):
+        assert repr(sub) == '<Subcategory 测试: 789|+132>'
+        sub.last = -132
+        assert repr(sub) == '<Subcategory 测试: 789|-132>'
+    
+    def test_budget(self):
+        with open('budget_test.toml', 'rb') as f:
+            main_rule = tomllib.load(f)['预算']
+        
+        # 日结
+        sub.rule = main_rule['饮食']['吃饭']
+        assert sub.budget((1, 10, 20)) == 501
+        # 月结
+        sub.rule = main_rule['生活']['服装外形']
+        assert sub.budget((1, 10, 20)) == 180
+        # 季度月结
+        sub.rule = main_rule['杂费']['洗衣']
+        # 冬，春秋，夏
+        assert sub.budget((1, 10, 20)) == 9
+        assert sub.budget((3, 10, 20)) == 12.5
+        assert sub.budget((6, 10, 20)) == 14
+        # 电费
+        sub.rule = main_rule['杂费']['电力']
+        assert sub.budget((1, 10, 20)) == Decimal('44.40')
+        assert sub.budget((3, 10, 20)) == Decimal('1.90')
+        assert sub.budget((6, 10, 20)) == Decimal('42.40')
+        pass

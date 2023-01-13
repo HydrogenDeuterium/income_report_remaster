@@ -70,22 +70,26 @@ MonthOutHome = TypeVar('MonthOutHome', bound=tuple[int, int, int])
 
 # 子类别
 class SubCategory(BaseCategory):
-    def __init__(self, name, last, rule):
+    def __init__(self, name, last, rule, cost=None):
         super().__init__(name)
-        price = input(f'{self.name}:\n')
-        self.cost = Decimal(f'{price:.2f}')
+        if cost is None:
+            price = filter_input(f'{self.name}:\n')
+            self.cost = Decimal(f'{price:.2f}')
+        else:
+            self.cost = cost
         self.last = last
         # budget 计算 rule
         self.rule = rule
     
     def __repr__(self):
-        return f'<Subcategory: {self.name}: {self.cost} | {self.last:+} >'
+        return f'<Subcategory {self.name}: {self.cost}|{self.last:+}>'
     
-    @lru_cache
+    # @lru_cache
     def budget(self, day: MonthOutHome):
         month, out, home = day
         season = get_season(month)
         
+        # 按四人同住计算，但怎么传入同住人数，目前没想好
         def special(rule, n=4):
             per_day = rule['基础']
             additional = rule.get(season)
