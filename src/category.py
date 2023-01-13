@@ -123,18 +123,13 @@ class Category(BaseCategory):
         return BaseCategory.__format__(self)
     
     def __format__(self, format_spec=''):
-        # 不使用下面一行的写法，为了防止报错，感觉好蠢，是我蠢还是 IDE 蠢？我觉得是 IDE：
-        # 应为类型 'list[Category]' (匹配的泛型类型 'list[_T]')，但实际为 'list[SubCategory]'
-        # 应为类型 'Iterable[str]' (匹配的泛型类型 'Iterable[_T1]')，但实际为 'list[SubCategory]'
-        base_categories=[self]+self.subs
         base_categories: list[BaseCategory] = [self]
         base_categories += self.subs
-        return '\n\t'.join(map(BaseCategory.__format__, base_categories))
         # Returns like:
         # '''- xxx
         # \t- sub_xxx1'''
         # \t- sub_xxx2
         # \t- sub_xxx3
-        # \t- sub_xxx4
-        # '''
-        # return self.format() + '\n\t' + '\n\t'.join(map(format, self.subs))
+        # Pycharm 有 bug，会认为 __format__() 要传入 str
+        # return '\n\t'.join(map(BaseCategory.__format__, base_categories))
+        return '\n\t'.join(map(lambda x: BaseCategory.__format__(x), base_categories))
