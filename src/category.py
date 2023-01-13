@@ -7,9 +7,9 @@ Price = TypeVar("Price", Decimal, float, int)
 sys_input = input
 
 
-def filter_input(*args, **kwargs) -> str:
+def filter_input(*args, in_=sys_input, **kwargs) -> str:
     """过滤输入中的空行和井号开头的行。注意空格后带井号不会被过滤。"""
-    while ret := sys_input(*args, **kwargs):
+    while ret := in_(*args, **kwargs):
         if not ret.startswith('#'):
             return ret
 
@@ -28,10 +28,12 @@ def get_season(month: int) -> str:
 
 class BaseCategory:
     # 类别名称，上月结转，本月花费，本月预算，（至）下月结转
-    __slots__ = ['name', 'last', 'cost']
+    # __slots__ = ['name', 'last', 'cost', 'budget', 'next']
     
     def __init__(self, name: str):
         self.name = name
+        self.last = None
+        self.cost = None
     
     def __format__(self, format_spec=''):
         return f'- {self.name}: {self.cost} | {self.budget()} '\
