@@ -1,13 +1,15 @@
+import builtins
+import pytest
+
 from abc import abstractmethod
 from decimal import Decimal
 from functools import lru_cache
 from typing import Sequence, TypeVar
 
 Price = TypeVar("Price", Decimal, float, int)
-sys_input = input
 
 
-def filter_input(*args, in_=sys_input, **kwargs) -> str:
+def filter_input(*args, in_=builtins.input, **kwargs) -> str:
     """过滤输入中的空行和井号开头的行。注意空格后带井号不会被过滤。"""
     while ret := in_(*args, **kwargs):
         if not ret.startswith('#'):
@@ -40,6 +42,7 @@ class BaseCategory:
                f'{self.last:+} = {self.next()}{self.advice()}\n'
     
     # 防止 IDE 报 warning
+    @pytest.mark.skipif(reason='abstract placeholder method')
     @abstractmethod
     def budget(self, *args):
         pass

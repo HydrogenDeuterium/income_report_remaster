@@ -1,7 +1,5 @@
 from copy import deepcopy
 
-import pytest
-
 from src.category import *
 
 
@@ -30,15 +28,15 @@ class TestBase:
         assert base.next() == 456 + 789 - 123
     
     def test_format(self):
-        # 上升趋势
+        # 上升趋势，结余
         b = deepcopy(base)
         assert format(b) == '- 测试: 123 | 456 +789 = 1122 ↑\n'
         # 波折趋势
         b.cost = 457
         assert format(b) == '- 测试: 457 | 456 +789 = 788\n'
-        # 短路趋势
+        # 短路趋势,小幅度波动
         b.last = 454
         assert format(b) == '- 测试: 457 | 456 +454 = 453\n'
-        # 下降趋势
+        # 下降趋势，赤字
         b.last = -500
         assert format(b) == '- 测试: 457 | 456 -500 = -501 ↓\n'
