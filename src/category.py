@@ -28,7 +28,7 @@ def get_season(month: int) -> str:
 
 class BaseCategory:
     # 类别名称，上月结转，本月花费，本月预算，（至）下月结转
-    __slots__ = ['name', 'last', 'cost', 'budget', 'next']
+    __slots__ = ['name', 'last', 'cost']
     
     def __init__(self, name: str):
         self.name = name
