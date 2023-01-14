@@ -118,7 +118,9 @@ class SubCategory(BaseCategory):
         return ret
 
 
-NameLastRuleCo: TypeAlias = tuple[str, Price, dict, Price] | tuple[str, Price, dict]
+# 最后一个 tuple 是给弱智类型检查擦屁股用的
+NameLastRuleCo: TypeAlias = tuple[str, Price, dict, Price] | tuple[str, Price, dict] \
+                            | tuple
 
 
 # 大类别
