@@ -8,3 +8,4 @@ tmp*.
 pdate
 /htmlReport/
 /测试结果 -.html
+*result.json
