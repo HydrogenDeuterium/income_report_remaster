@@ -10,9 +10,10 @@ Price = TypeVar("Price", Decimal, float, int)
 
 def filter_input(*args, in_=builtins.input, **kwargs) -> str:
     """过滤输入中的空行和井号开头的行。注意空格后带井号不会被过滤。"""
-    while ret := in_(*args, **kwargs):
-        if not ret.startswith('#'):
-            return ret
+    while (ret := in_(*args, **kwargs)) == ''\
+            or ret.startswith('#'):
+        pass
+    return ret
 
 
 def get_season(month: int) -> str:
@@ -74,7 +75,7 @@ class SubCategory(BaseCategory):
         self.cache = None
         if cost is None:
             price = filter_input(f'{self.name}:\n')
-            self.cost = Decimal(f'{price:.2f}')
+            self.cost = Decimal(f'{Decimal(price):.2f}')
         else:
             self.cost = cost
         self.last = last
@@ -84,13 +85,7 @@ class SubCategory(BaseCategory):
     def __repr__(self):
         return f'<Subcategory {self.name}: {self.cost}|{self.last:+}>'
     
-    # @lru_cache
-    def budget(self, day: MonthOutHome = None):
-        if not day:
-            if self.cache is None:
-                raise NameError('No cache!')
-            else:
-                return self.cache
+    def budget_by_month(self, day):
         month, out, home = day
         season = get_season(month)
         
@@ -114,12 +109,26 @@ class SubCategory(BaseCategory):
         
         calculator = rule_map[self.rule['类型']]
         ret = Decimal(f'{calculator(self.rule):.2f}')
+        return ret
+    
+    # @lru_cache
+    def budget(self, days: MonthOutHome = None):
+        if not days:
+            if self.cache is None:
+                raise NameError('No cache!')
+            else:
+                return self.cache
+        
+        if isinstance(days, tuple):
+            days = [days]
+        
+        ret = sum(self.budget_by_month(day) for day in days)
         self.cache = ret
         return ret
 
 
 # 最后一个 tuple 是给弱智类型检查擦屁股用的
-NameLastRuleCo: TypeAlias = tuple[str, Price, dict, Price] | tuple[str, Price, dict] \
+NameLastRuleCo: TypeAlias = tuple[str, Price, dict, Price] | tuple[str, Price, dict]\
                             | tuple
 
 
