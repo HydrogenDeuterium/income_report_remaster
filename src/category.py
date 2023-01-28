@@ -96,7 +96,7 @@ class SubCategory(BaseCategory):
             if additional:
                 # additional['算法'] like: 'n+2/n' or '6-n/n', ensured safe
                 extra = additional['在校'] * eval(additional['算法'], {'n': n})
-                # print(f'[DEBUG]{self.name}费用：基础：{per_day}，额外:{extra}')
+                print(f'[DEBUG]{self.name}费用：基础：{per_day * out}，额外:{extra * out}')
                 per_day += extra
             return per_day * out
         
