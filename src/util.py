@@ -1,11 +1,13 @@
+import re
 import tomllib
+from collections import defaultdict
+from decimal import Decimal
+from typing import Any, Type
 
 import jinja2
 import mistune
-import re
-from decimal import Decimal
 
-from src.category import Category, filter_input, MonthOutHome
+from category import Category, filter_input, MonthOutHome
 
 
 def get_months(s: str) -> list[int]:
@@ -51,10 +53,13 @@ def get_month_days(yearmonth=None, *, test=False) -> (int, list[MonthOutHome]):
     return int(year), month_out_homes
 
 
-def get_last(last_year: int, last_month) -> dict[str, Decimal]:
+def get_last(last_year: int, last_month) -> defaultdict[Any, Type[Decimal]] | dict[Any, Decimal]:
     """依赖上月月报格式获取各子项上月结余"""
     filename = f'{last_year}月报/{last_year % 100}{last_month :0>2}.md'
-    data_ = smart_import(filename)
+    try:
+        data_ = smart_import(filename)
+    except FileNotFoundError:
+        return defaultdict(Decimal)
     
     markdown = mistune.create_markdown(renderer='ast')
     
@@ -106,7 +111,7 @@ def get_structure(last_year: int, last_month: int, toml='./budget.toml', *, test
         
         cat = Category(category_name, name_last_rule_cos)
         categories.append(cat)
-        
+    
     return categories
 
 
