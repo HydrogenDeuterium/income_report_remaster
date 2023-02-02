@@ -101,7 +101,7 @@ class SubCategory(BaseCategory):
             if additional:
                 # additional['算法'] like: 'n+2/n' or '6-n/n', ensured safe
                 extra = additional['在校'] * eval(additional['算法'], {'n': n})
-                print(f'[DEBUG]{self.name}费用：基础：{per_day * out}，额外:{extra * out}')
+                print(f'[DEBUG]{self.name}费用：基础：{per_day * out:.2f}，额外:{extra * out:.2f}')
                 per_day += extra
             return per_day * out
         
@@ -172,5 +172,5 @@ class Category(BaseCategory):
         # \t- sub_xxx3
         # Pycharm 有 bug，会认为 __format__() 要传入 str
         # return '\n\t'.join(map(BaseCategory.__format__, base_categories))
-        ret = '\t'.join(map(lambda x: BaseCategory.__format__(x), base_categories))
+        ret = '\t'.join(map(lambda x: BaseCategory.__format__(x, format_spec), base_categories))
         return ret

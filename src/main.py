@@ -63,11 +63,11 @@ if __name__ == '__main__':
     _, outs, homes = zip(*next_month_out_home)
     match len(month_out_homes):
         case 1:
-            template = template = get_template('月报表尾.md')
+            template = get_template('月报表尾.md')
         case 3:
-            template = template = get_template('季报表尾.md')
+            template = get_template('季报表尾.md')
         case 12:
-            template = template = get_template('年报表尾.md')
+            template = get_template('年报表尾.md')
         case _:
             raise AssertionError
     tail = template.render(
