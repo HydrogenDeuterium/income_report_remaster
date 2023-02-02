@@ -17,6 +17,7 @@ if __name__ == '__main__':
     for i in categories:
         i.budget(month_out_homes)
     
+    # 周期长度的平方根
     mul = {1: '1', 3: '1.7', 12: '3.5'}[len(month_out_homes)]
     budget_text = ''.join(format(c, mul) for c in categories)
     
