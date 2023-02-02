@@ -10,15 +10,15 @@ last_year = year - int(last_month == 12)
 categories = get_structure(last_year, last_month)
 
 if __name__ == '__main__':
-#     pass
-#
-# import viztracer
-#
-# with viztracer.VizTracer():
+    pass
+    # import viztracer
+    
+    # with viztracer.VizTracer():
     for i in categories:
         i.budget(month_out_homes)
     
-    budget_text = ''.join(format(c) for c in categories)
+    mul = {1: '1', 3: '1.7', 12: '3.5'}[len(month_out_homes)]
+    budget_text = ''.join(format(c, mul) for c in categories)
     
     match len(month_out_homes):
         case 1:

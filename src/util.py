@@ -69,7 +69,7 @@ def get_last(last_year: int, last_month) -> defaultdict[Any, Type[Decimal]] | di
         subs += i['children'][1]['children']
     
     a = [sub['children'][0]['children'][0]['text'] for sub in subs]
-    ret = {}
+    ret = defaultdict(Decimal)
     for s in a:
         k, v = s.split(':')
         ret[k] = Decimal(v)

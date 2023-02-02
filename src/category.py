@@ -38,8 +38,10 @@ class BaseCategory:
         self.cost = None
     
     def __format__(self, format_spec=''):
-        return f'- {self.name}: {self.cost} | {self.budget()} '\
-               f'{self.last:+} = {self.next()}{self.advice()}\n'
+        ret = f'- {self.name}: {self.cost} | {self.budget()} '\
+              f'{self.last:+} = {self.next()}{self.advice(format_spec)}\n'
+    
+        return ret
     
     @pytest.mark.skipif(reason='abstract placeholder method')
     # 防止 IDE 报 warning
@@ -50,9 +52,12 @@ class BaseCategory:
     def next(self):
         return self.budget() + self.last - self.cost
     
-    def advice(self) -> str:
+    def advice(self, spec='') -> str:
         # 结转绝对值较小;不加下划线 IDE 会 warning
-        if abs(next_ := self.next()) <= self.cost:
+        abs_next_mul = abs(next_ := self.next()) * Decimal(spec)
+        if abs(next_)<self.cost<abs_next_mul:
+            print(f'[DEBUG]catch advice optimize:{self.name}')
+        if abs_next_mul <= self.cost:
             return ''
         # 结余不断增长
         if 0 < self.last < next_:
