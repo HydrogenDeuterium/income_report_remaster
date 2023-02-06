@@ -37,7 +37,7 @@ class BaseCategory:
         self.last = None
         self.cost = None
     
-    def __format__(self, format_spec=''):
+    def __format__(self, format_spec='1'):
         ret = f'- {self.name}: {self.cost} | {self.budget()} '\
               f'{self.last:+} = {self.next()}{self.advice(format_spec)}\n'
         
@@ -52,9 +52,10 @@ class BaseCategory:
     def next(self):
         return self.budget() + self.last - self.cost
     
-    def advice(self, spec='') -> str:
+    def advice(self, spec='1') -> str:
         # 结转绝对值较小;不加下划线 IDE 会 warning
-        abs_next_mul = abs(next_ := self.next()) * Decimal(spec)
+        multiplier = Decimal(spec or '1')
+        abs_next_mul = abs(next_ := self.next()) * multiplier
         if abs(next_) < self.cost < abs_next_mul:
             print(f'[DEBUG]catch advice optimize:{self.name}')
         if abs_next_mul <= self.cost:
@@ -65,6 +66,7 @@ class BaseCategory:
         # 赤字不断增长
         if next_ < self.last < 0:
             return ' ↓'
+        print("[DEBUG] situation not met, no advice")
         return ''
 
 
@@ -103,6 +105,8 @@ class SubCategory(BaseCategory):
                 extra = additional['在校'] * eval(additional['算法'], {'n': n})
                 print(f'[DEBUG]{self.name}费用：基础：{per_day * out:.2f}，额外:{extra * out:.2f}')
                 per_day += extra
+            else:
+                print(f'[DEBUG]{self.name}费用：基础：{per_day * out:.2f}，额外: 0')
             return per_day * out
         
         rule_map = {
@@ -162,7 +166,7 @@ class Category(BaseCategory):
     # def format(self):
     #     return BaseCategory.__format__(self)
     
-    def __format__(self, format_spec=''):
+    def __format__(self, format_spec='1'):
         base_categories: list[BaseCategory] = [self]
         base_categories += self.subs
         # Returns like:

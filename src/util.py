@@ -42,12 +42,20 @@ def get_month_days(yearmonth=None, *, test=False) -> (int, list[MonthOutHome]):
     
     month_out_homes: list[MonthOutHome] = []
     for m in months:
-        if test:
-            text = '25 5'
-        else:
-            text = filter_input(f'{m}月出门或在校天数 {m}月在家天数:')
-        search = re.search(r"(\d{1,2}) (\d{1,2})", text)
-        assert search, "输入格式不正确！"
+        try:
+            ast: list[dict] = smart_import(f"{year}月报/{year[-2:]}{m:02}.md", "md")
+            text = ast[1]['children'][0]['text']
+            search = re.search(r'本月共 \d+ 天，其中在校 (\d+) 天，在家 (\d+) 天。', text)
+            assert search
+        
+        except AssertionError:
+            if test:
+                text = '25 5'
+            else:
+                text = filter_input(f'{m}月出门或在校天数 {m}月在家天数:')
+            search = re.search(r"(\d{1,2}) (\d{1,2})", text)
+            assert search, "输入格式不正确！"
+        
         out, home = search.groups()
         month_out_homes.append((m, int(out), int(home)))
     return int(year), month_out_homes
@@ -57,41 +65,44 @@ def get_last(last_year: int, last_month) -> defaultdict[Any, Type[Decimal]] | di
     """依赖上月月报格式获取各子项上月结余"""
     filename = f'{last_year}月报/{last_year % 100}{last_month :0>2}.md'
     try:
-        data_ = smart_import(filename)
+        data_ = smart_import(filename, 'md')
     except FileNotFoundError:
         return defaultdict(Decimal)
     
-    markdown = mistune.create_markdown(renderer='ast')
-    
-    s = markdown(data_)[-1]['children']
+    s: list = data_[-1]['children']
     subs = []
     for i in s[:-1]:
         subs += i['children'][1]['children']
     
     a = [sub['children'][0]['children'][0]['text'] for sub in subs]
     ret = defaultdict(Decimal)
-    for s in a:
-        k, v = s.split(':')
+    for ss in a:
+        k, v = ss.split(':')
         ret[k] = Decimal(v)
     return ret
 
 
-def smart_import(filename, ext=None):
+def smart_import(filename, ext=None) -> str | dict | list[dict]:
+    if ext is None and len(filename.split('.')) == 2:
+        ext = filename.split('.')[-1]
+    
+    def smart_open(filename_, *args, **kwargs):
+        try:
+            return open("../" + filename_, *args, **kwargs)
+        except FileNotFoundError:
+            return open(filename_, *args)
+    
     match ext:
         case 'toml':
-            try:
-                with open('../' + filename, 'rb') as f:
-                    return tomllib.load(f)
-            except FileNotFoundError:
-                with open(filename, 'rb') as f:
-                    return tomllib.load(f)
+            with smart_open(filename, 'rb') as f:
+                return tomllib.load(f)
+        case 'md' | "markdown":
+            parser = mistune.create_markdown(renderer='ast')
+            with smart_open(filename, encoding='utf-8') as f:
+                return parser(f.read())
         case _:
-            try:
-                with open('../' + filename, encoding="utf-8") as f:
-                    data_ = f.read()
-            except FileNotFoundError:
-                with open(filename, encoding="utf-8") as f:
-                    data_ = f.read()
+            with open(filename, encoding="utf-8") as f:
+                data_ = f.read()
             return data_
 
 
@@ -126,6 +137,7 @@ def get_template(filename):
 
 def get_next(last_month_out_homes: list[MonthOutHome]) -> list[tuple]:
     """预测下一个时间段（月，季，年）在家在校天数"""
+    # TODO 已知问题：无法处理闰年情况 预计 2023 年末修复
     out_map: dict[int, tuple[int, int]] = {
         1: (23, 8), 2: (16, 12), 3: (31, 0), 4: (30, 0), 5: (31, 0), 6: (30, 0),
         7: (25, 6), 8: (5, 26), 9: (30, 0), 10: (28, 3), 11: (30, 0), 12: (31, 0),

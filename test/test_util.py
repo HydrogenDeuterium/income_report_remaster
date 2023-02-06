@@ -31,16 +31,15 @@ def test_get_month_days():
     with pytest.raises(AssertionError):
         get_month_days('!@#$%^&', test=True)
     assert get_month_days('2022yr', test=True) == (2022, [
-        (1, 25, 5), (2, 25, 5), (3, 25, 5), (4, 25, 5),
-        (5, 25, 5), (6, 25, 5), (7, 25, 5), (8, 25, 5),
-        (9, 25, 5), (10, 25, 5), (11, 25, 5), (12, 25, 5),
-    ])
+        (1, 23, 8), (2, 25, 5), (3, 31, 0), (4, 25, 5),
+        (5, 25, 5), (6, 25, 5), (7, 11, 20), (8, 28, 3),
+        (9, 25, 5), (10, 31, 0), (11, 25, 5), (12, 26, 5)])
 
 
 def test_smart_import():
-    toml = smart_import('../budget.toml', 'toml')
+    toml = smart_import('budget_test.toml', 'toml')
     assert toml == {
-        'version': '220703',
+        'version': 'test',
         '预算':    {
             '饮食': {
                 '吃饭':     {'类型': '日结', '在校': 39, '在家': 5.55},
