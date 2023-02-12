@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/income_report_remaster.iml" filepath="$PROJECT_DIR$/.idea/income_report_remaster.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../income_report/.idea/收支情况报告.iml" filepath="$PROJECT_DIR$/../income_report/.idea/收支情况报告.iml" />
     </modules>
   </component>
 </project>

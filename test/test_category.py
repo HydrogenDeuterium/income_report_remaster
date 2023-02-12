@@ -3,6 +3,7 @@ import tomllib
 from copy import deepcopy
 
 from src.category import *
+from src.util import smart_import
 
 
 def test_filter():
@@ -44,8 +45,8 @@ class TestBase:
 
 
 sub = SubCategory('测试', 132, None, 789, )
-with open('budget_test.toml', 'rb') as f:
-    main_rule = tomllib.load(f)['预算']
+rule = smart_import("budget_test.toml")
+main_rule: dict = rule['预算']
 
 
 class TestSub:

@@ -1,3 +1,4 @@
+import os
 import re
 import tomllib
 from collections import defaultdict
@@ -7,7 +8,9 @@ from typing import Any, Type
 import jinja2
 import mistune
 
-from category import Category, filter_input, MonthOutHome
+from .category import Category, filter_input, MonthOutHome
+
+file_dir = r"C:\Users\Deu\OneDrive\Projects\Python\income_report_remaster"
 
 
 def get_months(s: str) -> list[int]:
@@ -87,10 +90,12 @@ def smart_import(filename, ext=None) -> str | dict | list[dict]:
         ext = filename.split('.')[-1]
     
     def smart_open(filename_, *args, **kwargs):
-        try:
-            return open("../" + filename_, *args, **kwargs)
-        except FileNotFoundError:
-            return open(filename_, *args)
+        prefixes = "../", "", file_dir
+        for prefix in prefixes:
+            try:
+                return open(os.path.join(prefix , filename_), *args, **kwargs)
+            except FileNotFoundError:
+                pass
     
     match ext:
         case 'toml':

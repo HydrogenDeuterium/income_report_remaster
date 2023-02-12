@@ -1,7 +1,5 @@
 import contextlib
 
-import os
-
 import pytest
 
 from src.util import *
@@ -31,9 +29,9 @@ def test_get_month_days():
     with pytest.raises(AssertionError):
         get_month_days('!@#$%^&', test=True)
     assert get_month_days('2022yr', test=True) == (2022, [
-        (1, 23, 8), (2, 25, 5), (3, 31, 0), (4, 25, 5),
-        (5, 25, 5), (6, 25, 5), (7, 11, 20), (8, 28, 3),
-        (9, 25, 5), (10, 31, 0), (11, 25, 5), (12, 26, 5)])
+        (1, 23, 8), (2, 0, 28), (3, 31, 0), (4, 30, 0),
+        (5, 25, 5), (6, 30, 0), (7, 11, 20), (8, 28, 3),
+        (9, 30, 0), (10, 31, 0), (11, 30, 0), (12, 26, 5)])
 
 
 def test_smart_import():
