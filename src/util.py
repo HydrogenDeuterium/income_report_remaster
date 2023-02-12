@@ -1,3 +1,4 @@
+import contextlib
 import os
 import re
 import tomllib
@@ -8,7 +9,7 @@ from typing import Any, Type
 import jinja2
 import mistune
 
-from .category import Category, filter_input, MonthOutHome
+from category import Category, filter_input, MonthOutHome
 
 file_dir = r"C:\Users\Deu\OneDrive\Projects\Python\income_report_remaster"
 
@@ -44,21 +45,23 @@ def get_month_days(yearmonth=None, *, test=False) -> (int, list[MonthOutHome]):
     months = get_months(yearmonth.groups()[1])
     
     month_out_homes: list[MonthOutHome] = []
+    
     for m in months:
         try:
+            if len(months) == 1:
+                assert False
             ast: list[dict] = smart_import(f"{year}月报/{year[-2:]}{m:02}.md", "md")
             text = ast[1]['children'][0]['text']
             search = re.search(r'本月共 \d+ 天，其中在校 (\d+) 天，在家 (\d+) 天。', text)
             assert search
-        
-        except AssertionError:
+        except (AssertionError, FileNotFoundError):
             if test:
                 text = '25 5'
             else:
                 text = filter_input(f'{m}月出门或在校天数 {m}月在家天数:')
             search = re.search(r"(\d{1,2}) (\d{1,2})", text)
             assert search, "输入格式不正确！"
-        
+            
         out, home = search.groups()
         month_out_homes.append((m, int(out), int(home)))
     return int(year), month_out_homes
@@ -89,13 +92,19 @@ def smart_import(filename, ext=None) -> str | dict | list[dict]:
     if ext is None and len(filename.split('.')) == 2:
         ext = filename.split('.')[-1]
     
+    @contextlib.contextmanager
     def smart_open(filename_, *args, **kwargs):
         prefixes = "../", "", file_dir
         for prefix in prefixes:
             try:
-                return open(os.path.join(prefix , filename_), *args, **kwargs)
+                f = open(os.path.join(prefix, filename_), *args, **kwargs)
+                break
             except FileNotFoundError:
                 pass
+        else:
+            raise FileNotFoundError
+        yield f
+        f.close()
     
     match ext:
         case 'toml':

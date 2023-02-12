@@ -66,7 +66,8 @@ class BaseCategory:
         # 赤字不断增长
         if next_ < self.last < 0:
             return ' ↓'
-        print("[DEBUG] situation not met, no advice")
+        if (spec or "1") != '1':
+            print(f"[DEBUG]{self.name} situation not met, no advice")
         return ''
 
 

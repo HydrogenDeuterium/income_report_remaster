@@ -1,4 +1,4 @@
-import os
+import shutil
 
 from util import *
 
@@ -87,11 +87,12 @@ if __name__ == '__main__':
         input('确认完成 移动文件')
     except EOFError:
         pass
-    
-    path = f'./{year}月报'
+
+    opj = os.path.join
+    path = opj(file_dir, f'{year}月报')
     if not os.path.exists(path):
-        path = '.' + path
+        os.mkdir(path)
     
-    target = path + f'/{year % 100}{cycle_name:02}.md'
+    target = opj(path, f'{year % 100}{cycle_name:02}.md')
     print(target)
-    os.replace(tmp, target)
+    shutil.move(tmp, target)

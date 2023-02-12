@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
+    <content url="file://$USER_HOME$/OneDrive/Projects/Python/income_report_remaster">
+      <excludeFolder url="file://$USER_HOME$/OneDrive/Projects/Python/income_report_remaster/2021月报" />
+      <excludeFolder url="file://$USER_HOME$/OneDrive/Projects/Python/income_report_remaster/2022月报" />
+      <excludeFolder url="file://$USER_HOME$/OneDrive/Projects/Python/income_report_remaster/2023月报" />
+    </content>
     <content url="file://$MODULE_DIR$">
-      <excludeFolder url="file://$MODULE_DIR$/2020季度总结" />
-      <excludeFolder url="file://$MODULE_DIR$/2021月报" />
-      <excludeFolder url="file://$MODULE_DIR$/2022月报" />
-      <excludeFolder url="file://$MODULE_DIR$/test/.pytest_cache/v" />
-      <excludeFolder url="file://$MODULE_DIR$/htmlReport" />
+      <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/.pytest_cache" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.11" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
