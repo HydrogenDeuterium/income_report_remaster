@@ -53,7 +53,10 @@ if __name__ == '__main__':
     with open(tmp := './temp.md', 'w', encoding="utf-8") as f:
         f.write(head)
     
-    input('修改好了就回车继续')
+    try:
+        input('修改好了就回车继续')
+    except EOFError:
+        pass
     next_month_out_home = get_next(month_out_homes)
     for cat in categories:
         for sub in cat.subs:

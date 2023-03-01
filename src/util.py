@@ -11,7 +11,7 @@ import mistune
 
 from category import Category, filter_input, MonthOutHome
 
-file_dir = r"C:\Users\Deu\OneDrive\Projects\Python\income_report_remaster"
+file_dir = r"C:\Users\Deu\OneDrive\Projects\Python\income_report_data"
 
 
 def get_months(s: str) -> list[int]:
