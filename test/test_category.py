@@ -1,5 +1,3 @@
-import tomllib
-
 from copy import deepcopy
 
 from src.category import *
@@ -46,6 +44,7 @@ class TestBase:
 
 sub = SubCategory('测试', 132, None, 789, )
 rule = smart_import("budget_test.toml")
+    
 main_rule: dict = rule['预算']
 
 

@@ -7,7 +7,7 @@
 
 ## 工作流程
 
-> 由于 `tomllib` 直到 python 3.11 才进入标准库，因此运行需要 python 3.11
+> 由于 `tomllib` 直到 python 3.11 才进入标准库，因此运行需要 python 3.11 或更高
 
 1. 运行 main.py，生成 temp.md
 2. 更新预算信息（手动）

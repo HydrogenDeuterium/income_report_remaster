@@ -94,17 +94,18 @@ def smart_import(filename, ext=None) -> str | dict | list[dict]:
     
     @contextlib.contextmanager
     def smart_open(filename_, *args, **kwargs):
-        prefixes = "../", "", file_dir
+        prefixes = file_dir,"../", "",'test/'
         for prefix in prefixes:
             try:
-                f = open(os.path.join(prefix, filename_), *args, **kwargs)
+                file_path = os.path.join(prefix, filename_)
+                f_ = open(file_path, *args, **kwargs)
                 break
             except FileNotFoundError:
                 pass
         else:
-            raise FileNotFoundError
-        yield f
-        f.close()
+            raise FileNotFoundError(filename_)
+        yield f_
+        f_.close()
     
     match ext:
         case 'toml':
@@ -122,7 +123,11 @@ def smart_import(filename, ext=None) -> str | dict | list[dict]:
 
 def get_structure(last_year: int, last_month: int, toml='./budget.toml', *, test=False) -> list[Category]:
     """生成结构，写入上月结余和预算规则"""
-    items_budgets: dict[str, dict[str, dict]] = smart_import(toml, ext='toml')['预算']
+    try:
+        items_budgets: dict[str, dict[str, dict]] = smart_import(toml, ext='toml')['预算']
+    except FileNotFoundError:
+        items_budgets: dict[str, dict[str, dict]] = smart_import('budget/budget.toml', ext='toml')['预算']
+        
     last_data = get_last(last_year, last_month)
     
     categories = []
