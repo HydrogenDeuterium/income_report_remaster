@@ -1,0 +1,4 @@
+- {{ category.name }}: {{ category.next() }}
+  {%- for subcat in category.subs %}
+  - {{ subcat.name }}: {{ subcat.next() }}
+{%- endfor -%}

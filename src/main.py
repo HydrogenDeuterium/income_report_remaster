@@ -1,4 +1,5 @@
 import shutil
+from copy import deepcopy
 
 from util import *
 
@@ -12,15 +13,15 @@ categories = get_structure(last_year, last_month)
 if __name__ == '__main__':
     pass
     # import viztracer
-    
+
     # with viztracer.VizTracer():
     for i in categories:
         i.budget(month_out_homes)
-    
+
     # 周期长度的平方根
     mul = {1: '1', 3: '1.7', 12: '3.5'}[len(month_out_homes)]
     budget_text = ''.join(format(c, mul) for c in categories)
-    
+
     match len(month_out_homes):
         case 1:
             cycle_name = month_out_homes[0][0]
@@ -33,14 +34,14 @@ if __name__ == '__main__':
             template = get_template("年报表头.md")
         case _:
             raise AssertionError
-    
+
     # 各月总日期
     total = ','.join(str(i[1] + i[2]) for i in month_out_homes)
     # 各月外出日期
     out = ','.join(str(i[1]) for i in month_out_homes)
     # 各月回家日期
     home = ','.join(str(i[2]) for i in month_out_homes)
-    
+
     head = template.render(
         year=year,
         month=cycle_name,
@@ -49,16 +50,17 @@ if __name__ == '__main__':
         home=home,
         fenxiangzhichu=budget_text,
         categories=categories)
-    
+
     with open(tmp := './temp.md', 'w', encoding="utf-8") as f:
         f.write(head)
-    
+
     try:
         input('修改好了就回车继续')
     except EOFError:
         pass
     next_month_out_home = get_next(month_out_homes)
-    for cat in categories:
+    next_categories = deepcopy(categories)
+    for cat in next_categories:
         for sub in cat.subs:
             # update cache
             sub.budget(next_month_out_home)
@@ -79,13 +81,14 @@ if __name__ == '__main__':
         out=sum(outs),
         home=sum(homes),
         categories=categories,
+        next_category=next_categories,
         total_budget=sum(i.budget() for i in categories),
         total_next=sum(i.next() for i in categories),
     )
-    
+
     with open(tmp, 'a', encoding="utf-8") as f:
         f.write(tail)
-    
+
     try:
         input('确认完成 移动文件')
     except EOFError:
@@ -95,7 +98,7 @@ if __name__ == '__main__':
     path = opj(file_dir, f'{year}月报')
     if not os.path.exists(path):
         os.mkdir(path)
-    
+
     target = opj(path, f'{year % 100}{cycle_name:02}.md')
     print(target)
     shutil.move(tmp, target)

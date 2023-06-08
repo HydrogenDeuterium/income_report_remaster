@@ -10,7 +10,7 @@ Price = TypeVar("Price", Decimal, float, int)
 
 def filter_input(*args, in_=builtins.input, **kwargs) -> str:
     """过滤输入中的空行和井号开头的行。注意空格后带井号不会被过滤。"""
-    while (ret := in_(*args, **kwargs)) == ''\
+    while (ret := in_(*args, **kwargs)) == '' \
             or ret.startswith('#'):
         pass
     return ret
@@ -31,27 +31,29 @@ def get_season(month: int) -> str:
 class BaseCategory:
     # 类别名称，上月结转，本月花费，本月预算，（至）下月结转
     # __slots__ = ['name', 'last', 'cost', 'budget', 'next']
-    
+
     def __init__(self, name: str):
         self.name = name
         self.last = None
         self.cost = None
-    
+
     def __format__(self, format_spec='1'):
-        ret = f'- {self.name}: {self.cost} | {self.budget()} '\
+        ret = f'- {self.name}: {self.cost} | {self.budget()} ' \
               f'{self.last:+} = {self.next()}{self.advice(format_spec)}\n'
-        
+
         return ret
-    
+
     @pytest.mark.skipif(reason='abstract placeholder method')
     # 防止 IDE 报 warning
     @abstractmethod
     def budget(self, *args):
         pass
-    
+
     def next(self):
-        return self.budget() + self.last - self.cost
-    
+        ret = self.budget() + self.last - self.cost
+        # print(f'[DEBUG]{self.name}:{self.budget()=},{self.last=},{self.cost=},{ret=}')
+        return ret
+
     def advice(self, spec='1') -> str:
         # 结转绝对值较小;不加下划线 IDE 会 warning
         multiplier = Decimal(spec or '1')
@@ -89,14 +91,14 @@ class SubCategory(BaseCategory):
         self.last = last
         # budget 计算 rule
         self.rule = rule
-    
+
     def __repr__(self):
         return f'<Subcategory {self.name}: {self.cost}|{self.last:+}>'
-    
+
     def budget_by_month(self, day):
         month, out, home = day
         season = get_season(month)
-        
+
         # 按四人同住计算，但怎么传入同住人数，目前没想好
         def special(rule, n=4):
             per_day = rule['基础']
@@ -104,41 +106,44 @@ class SubCategory(BaseCategory):
             if additional:
                 # additional['算法'] like: 'n+2/n' or '6-n/n', ensured safe
                 extra = additional['在校'] * eval(additional['算法'], {'n': n})
-                print(f'[DEBUG]{self.name}费用：基础：{per_day * out:.2f}，额外:{extra * out:.2f}')
+                # print(f'[DEBUG]{self.name}费用：基础：{per_day * out:.2f}，额外:{extra * out:.2f}')
                 per_day += extra
             else:
-                print(f'[DEBUG]{self.name}费用：基础：{per_day * out:.2f}，额外: 0')
+                # print(f'[DEBUG]{self.name}费用：基础：{per_day * out:.2f}，额外: 0')
+                pass
             return per_day * out
-        
+
         rule_map = {
             '月结': lambda rule: rule['每月'],
             '日结': lambda rule: rule['在校'] * out + rule.get('在家', 0) * home,
             '季节': lambda rule: rule['在校'][season] * out + rule.get('在家', 0) * home,
             '特殊': special
         }
-        
+
         calculator = rule_map[self.rule['类型']]
         ret = Decimal(f'{calculator(self.rule):.2f}')
         return ret
-    
+
     # @lru_cache
     def budget(self, days: MonthOutHome = None):
         if not days:
             if self.cache is None:
                 raise NameError('No cache!')
             else:
-                return self.cache
-        
+                ret = self.cache
+                return ret
+
         if isinstance(days, tuple):
             days = [days]
-        
+
         ret = sum(self.budget_by_month(day) for day in days)
         self.cache = ret
+
         return ret
 
 
 # 最后一个 tuple 是给弱智类型检查擦屁股用的
-NameLastRuleCo: TypeAlias = tuple[str, Price, dict, Price] | tuple[str, Price, dict]\
+NameLastRuleCo: TypeAlias = tuple[str, Price, dict, Price] | tuple[str, Price, dict] \
                             | tuple
 
 
@@ -148,25 +153,25 @@ class Category(BaseCategory):
         super().__init__(name)
         self.subs = [SubCategory(*name_etc) for name_etc in name_last_rule]
         self.last = sum(_.last for _ in self.subs)
-    
+
     def __repr__(self):
         return f'<Category: {self.name}: {[sub.name for sub in self.subs]}>'
-    
+
     def budget(self, *args):
         return sum(_.budget(*args) for _ in self.subs)
-    
+
     # 没用，但是 super.init 必须要初始化 cost 否则 warn
     @property
     def cost(self):
         return sum(_.cost for _ in self.subs)
-    
+
     @cost.setter
     def cost(self, val):
         pass
-    
+
     # def format(self):
     #     return BaseCategory.__format__(self)
-    
+
     def __format__(self, format_spec='1'):
         base_categories: list[BaseCategory] = [self]
         base_categories += self.subs
