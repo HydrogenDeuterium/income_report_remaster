@@ -1,5 +1,6 @@
 import pytest
 
+from date import get_month_days, get_months, get_next, get_working_days
 from src.util import *
 
 
@@ -27,13 +28,22 @@ def test_get_month_days():
     with pytest.raises(AssertionError):
         get_month_days('!@#$%^&', test=True)
     assert get_month_days('2022yr', test=True) == (2022, [
-        (1, 23, 8), (2, 0, 28), (3, 31, 0), (4, 30, 0),
-        (5, 25, 5), (6, 30, 0), (7, 11, 20), (8, 28, 3),
-        (9, 30, 0), (10, 31, 0), (11, 30, 0), (12, 26, 5)])
+        (1, {'default': 0, '在家': 8, '在校': 23}),
+        (2, {'default': 0, '在家': 28, '在校': 0}),
+        (3, {'default': 0, '在家': 0, '在校': 31}),
+        (4, {'default': 0, '在家': 0, '在校': 30}),
+        (5, {'default': 0, '在家': 0, '在校': 31}),
+        (6, {'default': 0, '在家': 0, '在校': 30}),
+        (7, {'default': 0, '在家': 20, '在校': 11}),
+        (8, {'default': 0, '在家': 3, '在校': 28}),
+        (9, {'default': 0, '在家': 0, '在校': 30}),
+        (10, {'default': 0, '在家': 0, '在校': 31}),
+        (11, {'default': 0, '在家': 0, '在校': 30}),
+        (12, {'default': 0, '在家': 5, '在校': 26})])
 
 
 def test_smart_import():
-    toml = smart_import('budget_test.toml', 'toml')
+    toml = smart_import('budget_old.toml', 'toml')
     assert toml == {
         'version': 'test',
         '预算':    {
@@ -111,7 +121,8 @@ def test_get_struct():
         "<Category: 学习: ['软件服务', '文具资料']>, "
         "<Category: 娱乐: ['小说', '视频游戏', '其它娱乐']>, "
         "<Category: 数码: ['主机', '配件']>, "
-        "<Category: 杂费: ['洗衣', '电力', '其他']>]")
+        # "<Category: 杂费: ['洗衣', '电力', '其他']>]")
+        "<Category: 杂费: ['洗衣', '其他']>]")
 
 
 def test_get_template():
@@ -127,3 +138,9 @@ def test_get_next():
     assert ret == [(1, 23, 8), (2, 16, 12), (3, 31, 0), (4, 30, 0),
                    (5, 31, 0), (6, 30, 0), (7, 25, 6), (8, 5, 26),
                    (9, 30, 0), (10, 28, 3), (11, 30, 0), (12, 31, 0)]
+
+
+def test_get_working_days():
+    assert get_working_days(2023, 1) == 18
+    assert get_working_days(2023, 2) == 19
+    assert get_working_days(2023, 3) == 22

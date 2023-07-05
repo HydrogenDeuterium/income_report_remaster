@@ -1,33 +1,34 @@
 import shutil
 from copy import deepcopy
 
+from date import get_month_days, get_next
 from util import *
 
-year, month_out_homes = get_month_days()
+year, months_and_days = get_month_days()
 
-last_month = (month_out_homes[0][0] - 2) % 12 + 1
+last_month = (months_and_days[0][0] - 2) % 12 + 1
 last_year = year - int(last_month == 12)
 
 categories = get_structure(last_year, last_month)
+for i in categories:
+    i.budget(months_and_days)
 
 if __name__ == '__main__':
     pass
     # import viztracer
 
     # with viztracer.VizTracer():
-    for i in categories:
-        i.budget(month_out_homes)
 
     # 周期长度的平方根
-    mul = {1: '1', 3: '1.7', 12: '3.5'}[len(month_out_homes)]
+    mul = {1: '1', 3: '1.7', 12: '3.5'}[len(months_and_days)]
     budget_text = ''.join(format(c, mul) for c in categories)
 
-    match len(month_out_homes):
+    match len(months_and_days):
         case 1:
-            cycle_name = month_out_homes[0][0]
+            cycle_name = months_and_days[0][0]
             template = get_template("月报表头.md")
         case 3:
-            cycle_name = f'Q{month_out_homes[-1][0] // 3}'
+            cycle_name = f'Q{months_and_days[-1][0] // 3}'
             template = get_template("季报表头.md")
         case 12:
             cycle_name = 'YR'
@@ -36,11 +37,11 @@ if __name__ == '__main__':
             raise AssertionError
 
     # 各月总日期
-    total = ','.join(str(i[1] + i[2]) for i in month_out_homes)
+    total = ','.join(str(i[1] + i[2]) for i in months_and_days)
     # 各月外出日期
-    out = ','.join(str(i[1]) for i in month_out_homes)
+    out = ','.join(str(i[1]) for i in months_and_days)
     # 各月回家日期
-    home = ','.join(str(i[2]) for i in month_out_homes)
+    home = ','.join(str(i[2]) for i in months_and_days)
 
     head = template.render(
         year=year,
@@ -58,7 +59,7 @@ if __name__ == '__main__':
         input('修改好了就回车继续')
     except EOFError:
         pass
-    next_month_out_home = get_next(month_out_homes)
+    next_month_out_home = get_next(months_and_days)
     next_categories = deepcopy(categories)
     for cat in next_categories:
         for sub in cat.subs:
@@ -67,7 +68,7 @@ if __name__ == '__main__':
     outs: tuple
     homes: tuple
     _, outs, homes = zip(*next_month_out_home)
-    match len(month_out_homes):
+    match len(months_and_days):
         case 1:
             template = get_template('月报表尾.md')
         case 3:
