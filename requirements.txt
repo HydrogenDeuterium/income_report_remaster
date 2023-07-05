@@ -1,3 +1,4 @@
-pytest
-jinja2
-mistune
+pytest==7.4.0
+jinja2~=3.1.2
+mistune==3.0.1
+workalendar~=17.0.0
