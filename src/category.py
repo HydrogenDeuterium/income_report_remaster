@@ -102,19 +102,21 @@ class SubCategory(BaseCategory):
     def budget_by_month(self, data: MonthAndDays):
         days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
         
-        try:
-            month, day_map = data
-        except TypeError:
-            pass
+        month, day_map = data
+        # try:
+        #     month, day_map = data
+        # except TypeError:
+        #     pass
         season = get_season(month)
         
         def dately(rule):
             ret_d = 0
             for k, v in day_map.items():
-                try:
-                    ret_d += rule[k] * v
-                except KeyError:
-                    pass
+                ret_d += rule[k] * v
+                # try:
+                #     ret_d += rule[k] * v
+                # except KeyError:
+                #     pass
             if 'default' not in day_map:
                 default_days = days_in_month[month] - sum(day_map.values())
                 assert default_days > 0
@@ -128,12 +130,13 @@ class SubCategory(BaseCategory):
             ret_s = 0
             for k, v in day_map.items():
                 if k != 'default':
-                    try:
-                        ret_s += rule.get(k, 0) * v
-                    except KeyError:
-                        pass
-                    except TypeError:
-                        pass
+                    ret_s += rule.get(k, 0) * v
+                    # try:
+                    #     ret_s += rule.get(k, 0) * v
+                    # except KeyError:
+                    #     pass
+                    # except TypeError:
+                    #     pass
             default_days = day_map.get('default') or days_in_month[month] - sum(day_map.values())
             try:
                 ret_s += rule['default'][season] * default_days
@@ -164,10 +167,11 @@ class SubCategory(BaseCategory):
         }
         
         calculator = rule_map[self.rule['类型']]
-        try:
-            ret = Decimal(f'{calculator(self.rule):.2f}')
-        except TypeError:
-            pass
+        ret = Decimal(f'{calculator(self.rule):.2f}')
+        # try:
+        #     ret = Decimal(f'{calculator(self.rule):.2f}')
+        # except TypeError:
+        #     pass
         return ret
     
     # @lru_cache
