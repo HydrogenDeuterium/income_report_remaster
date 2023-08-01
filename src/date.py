@@ -39,6 +39,8 @@ def get_month_days(yearmonth=None, *, test=False, restraint_keys: list[str] = No
     assert yearmonth, "输入格式不正确！"
     
     year = yearmonth.groups()[0]
+    
+    # 注意，月份从 1 开始！
     months = get_months(yearmonth.groups()[1])
     
     month_and_dayses: list[MonthAndDays] = []
@@ -50,7 +52,7 @@ def get_month_days(yearmonth=None, *, test=False, restraint_keys: list[str] = No
         search = re.search(r"(\d{1,2}) (\d{1,2})", text)
         assert search, "输入格式不正确！"
         zaixiao, zaijia = search.groups()
-        month_and_dayses.append((m, {'在校': zaixiao, '在家': zaijia}))
+        month_and_dayses.append((m, {'在校': int(zaixiao), '在家': int(zaijia)}))
     else:
         for m in months:
             ast: list[dict] = smart_import(f"{year}月报/{year[-2:]}{m:02}.md", "md")

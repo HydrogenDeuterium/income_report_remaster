@@ -16,13 +16,13 @@ for i in categories:
 if __name__ == '__main__':
     pass
     # import viztracer
-
+    
     # with viztracer.VizTracer():
-
+    
     # 周期长度的平方根
     mul = {1: '1', 3: '1.7', 12: '3.5'}[len(months_and_days)]
     budget_text = ''.join(format(c, mul) for c in categories)
-
+    
     match len(months_and_days):
         case 1:
             cycle_name = months_and_days[0][0]
@@ -35,14 +35,14 @@ if __name__ == '__main__':
             template = get_template("年报表头.md")
         case _:
             raise AssertionError
-
+    
     # 各月总日期
-    total = ','.join(str(i[1] + i[2]) for i in months_and_days)
+    total = ','.join(str(i[1]['在家'] + i[1]['在校']) for i in months_and_days)
     # 各月外出日期
-    out = ','.join(str(i[1]) for i in months_and_days)
+    out = ','.join(str(i[1]['在校']) for i in months_and_days)
     # 各月回家日期
-    home = ','.join(str(i[2]) for i in months_and_days)
-
+    home = ','.join(str(i[1]['在家']) for i in months_and_days)
+    
     head = template.render(
         year=year,
         month=cycle_name,
@@ -51,10 +51,10 @@ if __name__ == '__main__':
         home=home,
         fenxiangzhichu=budget_text,
         categories=categories)
-
+    
     with open(tmp := './temp.md', 'w', encoding="utf-8") as f:
         f.write(head)
-
+    
     try:
         input('修改好了就回车继续')
     except EOFError:
@@ -86,20 +86,20 @@ if __name__ == '__main__':
         total_budget=sum(i.budget() for i in categories),
         total_next=sum(i.next() for i in categories),
     )
-
+    
     with open(tmp, 'a', encoding="utf-8") as f:
         f.write(tail)
-
+    
     try:
         input('确认完成 移动文件')
     except EOFError:
         pass
-
+    
     opj = os.path.join
     path = opj(file_dir, f'{year}月报')
     if not os.path.exists(path):
         os.mkdir(path)
-
+    
     target = opj(path, f'{year % 100}{cycle_name:02}.md')
     print(target)
     shutil.move(tmp, target)

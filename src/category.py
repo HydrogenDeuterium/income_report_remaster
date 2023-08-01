@@ -100,9 +100,21 @@ class SubCategory(BaseCategory):
         return f'<Subcategory {self.name}: {self.cost}|{self.last:+}>'
     
     def budget_by_month(self, data: MonthAndDays):
-        days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+        # 月份从 1 开始
+        DAYS_IN_MONTHS = [..., 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
         
-        month, day_map = data
+        # month, day_map = data
+        # ---DEBUG---
+        try:
+            month, day_map = data
+        # 处理 budget 中的旧版传参方式，修改后可去除 try
+        except ValueError:
+            day_map = {}
+            month, day_map['在家'], day_map['在校'] = data
+        
+        for k, v in day_map.items():
+            day_map[k] = int(v)
+        
         # try:
         #     month, day_map = data
         # except TypeError:
@@ -112,15 +124,21 @@ class SubCategory(BaseCategory):
         def dately(rule):
             ret_d = 0
             for k, v in day_map.items():
-                ret_d += rule[k] * v
-                # try:
-                #     ret_d += rule[k] * v
-                # except KeyError:
-                #     pass
+                # ret_d += rule[k] * v
+                try:
+                    ret_d += rule[k] * v
+                except KeyError:
+                    if 'default' in rule:
+                        ret_d += rule['default'] * v
+                    else:
+                        print(f'[WARNING]试图请求未设置的默认值：{rule}')
             if 'default' not in day_map:
-                default_days = days_in_month[month] - sum(day_map.values())
-                assert default_days > 0
-                ret_d += rule['default'] * default_days
+                default_days = DAYS_IN_MONTHS[month] - sum(day_map.values())
+                assert default_days >= 0
+                try:
+                    ret_d += rule['default'] * default_days
+                except KeyError:
+                    print(f'[WARNING]试图请求未设置的默认值：{rule}')
             
             return ret_d
         
@@ -130,14 +148,18 @@ class SubCategory(BaseCategory):
             ret_s = 0
             for k, v in day_map.items():
                 if k != 'default':
-                    ret_s += rule.get(k, 0) * v
-                    # try:
-                    #     ret_s += rule.get(k, 0) * v
-                    # except KeyError:
-                    #     pass
-                    # except TypeError:
-                    #     pass
-            default_days = day_map.get('default') or days_in_month[month] - sum(day_map.values())
+                    # ret_s += rule.get(k, 0) * v
+                    try:
+                        # 感觉这里类型标注是有点问题的
+                        budget: Price = rule.get(k, 0)
+                        if isinstance(budget, dict):
+                            budget = budget[season]
+                        ret_s += budget * v
+                    except KeyError:
+                        pass
+                    except TypeError:
+                        pass
+            default_days = day_map.get('default') or DAYS_IN_MONTHS[month] - sum(day_map.values())
             try:
                 ret_s += rule['default'][season] * default_days
             except KeyError:
@@ -186,6 +208,7 @@ class SubCategory(BaseCategory):
         if isinstance(days, (dict, tuple)):
             days = [days]
         
+        # TODO 待调整，现在传给 budget_by_month 的参数有点问题
         ret = sum(self.budget_by_month(day) for day in days)
         self.cache = ret
         
