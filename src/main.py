@@ -82,7 +82,7 @@ if __name__ == '__main__':
         out=sum(outs),
         home=sum(homes),
         categories=categories,
-        next_category=next_categories,
+        next_categories=next_categories,
         total_budget=sum(i.budget() for i in categories),
         total_next=sum(i.next() for i in categories),
     )
