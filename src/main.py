@@ -14,6 +14,7 @@ for i in categories:
     i.budget(months_and_days)
 
 if __name__ == '__main__':
+    print(flush=True)
     pass
     # import viztracer
     

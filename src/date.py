@@ -16,9 +16,10 @@ def get_months(s: str) -> list[int]:
     '3'->3
     'Q3'->7,8,9
     """
-    if s.startswith(('yr', 'YR', 'yR', 'Yr')):
+    s = s.lower()
+    if s == 'yr':
         months = list(range(1, 13))
-    elif s.startswith(('q', 'Q')):
+    elif s.startswith('q'):
         quarter = int(s[1])
         months = list(range(quarter * 3 - 2, quarter * 3 + 1))
     else:
@@ -50,8 +51,13 @@ def get_month_days(yearmonth=None, *, test=False, restraint_keys: list[str] = No
         m = months[0]
         text = filter_input(f'{m}月出门或在校天数 {m}月在家天数:')
         search = re.search(r"(\d{1,2}) (\d{1,2})", text)
-        assert search, "输入格式不正确！"
-        zaixiao, zaijia = search.groups()
+        if not search:
+            raise AssertionError("输入格式不正确！需要提供本月活动情况！")
+            # 如果是交互式的可以这么做
+            # print("输入格式不正确！需要提供本月活动情况！")
+            # zaixiao = 30 - (zaijia := get_working_days(m))
+        else:
+            zaixiao, zaijia = search.groups()
         month_and_dayses.append((m, {'在校': int(zaixiao), '在家': int(zaijia)}))
     else:
         for m in months:
@@ -73,7 +79,8 @@ def get_month_days(yearmonth=None, *, test=False, restraint_keys: list[str] = No
     return int(year), month_and_dayses
 
 
-def get_working_days(year, month):
+def get_working_days(year, month, cal=China()):
+    """基于 worklender 计算月内的工作日数量"""
     # 获取该月的第一天和最后一天的星期几和天数
     _, days_in_month = calendar.monthrange(year, month)
     
@@ -82,7 +89,8 @@ def get_working_days(year, month):
     end_date = datetime.date(year, month, days_in_month)
     
     # 计算两个日期之间的工作日数量
-    working_days = China().get_working_days_delta(start_date, end_date)
+    # from workalendar.asia import China
+    working_days = cal.get_working_days_delta(start_date, end_date)
     
     # 返回工作日数量
     return working_days

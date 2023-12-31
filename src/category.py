@@ -200,7 +200,7 @@ class SubCategory(BaseCategory):
     def budget(self, days: MonthAndDays = None):
         if not days:
             if self.cache is None:
-                raise NameError('No cache!')
+                raise AttributeError('No cache!')
             else:
                 ret = self.cache
                 return ret
