@@ -8,23 +8,23 @@ from category import filter_input, MonthAndDays
 from util import smart_import
 
 
-def get_months(s: str) -> list[int]:
-    """
-    月份从 1 开始。
-    'yr'->1,2,3,4,5,6,7,8,9,10,11,12
-    'q1'->1,2,3
-    '3'->3
-    'Q3'->7,8,9
-    """
-    s = s.lower()
-    if s == 'yr':
-        months = list(range(1, 13))
-    elif s.startswith('q'):
-        quarter = int(s[1])
-        months = list(range(quarter * 3 - 2, quarter * 3 + 1))
-    else:
-        months = [int(s)]
-    return months
+# def get_months(s: str) -> list[int]:
+#     """
+#     月份从 1 开始。
+#     'yr'->1,2,3,4,5,6,7,8,9,10,11,12
+#     'q1'->1,2,3
+#     '3'->3
+#     'Q3'->7,8,9
+#     """
+#     s = s.lower()
+#     if s == 'yr':
+#         months = list(range(1, 13))
+#     elif s.startswith('q'):
+#         quarter = int(s[1])
+#         months = list(range(quarter * 3 - 2, quarter * 3 + 1))
+#     else:
+#         months = [int(s)]
+#     return months
 
 
 def get_month_days(yearmonth=None, *, test=False, restraint_keys: list[str] = None) -> (int, list[MonthAndDays]):
