@@ -13,6 +13,7 @@ from category import Category
 file_dir = r"C:\Users\Deu\OneDrive\Projects\Python\income_report_data"
 
 
+
 def get_last(last_year: int, last_month) -> defaultdict[Any, Type[Decimal]] | dict[Any, Decimal]:
     """依赖上月月报格式获取各子项上月结余"""
     filename = f'{last_year}月报/{last_year % 100}{last_month :0>2}.md'
@@ -104,3 +105,8 @@ def get_template(filename):
     except jinja2.exceptions.TemplateNotFound:
         return jinja2.Environment(loader=jinja2.FileSystemLoader(
             "../template")).get_template(filename)
+
+
+budget_data = smart_import('../test/budget.toml', ext='toml')
+budget_version = budget_data.pop('__version')
+budget_fields = budget_data.pop('__fields')
