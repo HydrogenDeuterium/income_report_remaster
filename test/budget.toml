@@ -1,82 +1,106 @@
-version = '230702'
+__version = '240101'
 
 #daily fields
-fields =['default',]
+__fields = ['out', 'home', 'default']
 
-# TODO 7月开始上班之后这个分类要重新调整
-['预算'.'饮食']
-# 包含请客吃饭
-'吃饭'.'类型' = '日结'
-'吃饭'.'default' = 10
-'吃饭'.'home' = 5.55
+# allowed types: daily, monthly,season
+# for season,value keys can be hot,warm,cold
+# hot:6 7 8 9, warm: 3 4 5 10, cold:11 12 1 2
+# otherwise, key should be listed in __fields.
 
-'饮料'.'类型' = '日结'
-'饮料'.'default' = 6.75
-'饮料'.'home' = 0.2
+# 饮食
+['饮食'.'吃饭']
+type = 'daily'
+value = { out = 15, home = 7.40, default = 11.02 }
 
-'水果牛奶'.'类型' = '日结'
-'水果牛奶'.'default' = 3.8
-'水果牛奶'.'home' = 3.65
+['饮食'.'饮料']
+type = 'daily'
+value = { out = 6.75, home = 0.22, default = 6.75 }
 
-'零食冷饮'.'类型' = '日结'
-'零食冷饮'.'default' = 0.57
+['饮食'.'水果牛奶']
+type = 'daily'
+value = { home = 3.30, default = 3.8 }
 
-['预算'.'生活']
-'耐用品'.'类型' = '日结'
-'耐用品'.'在校' = 2.17
-
-'服装外形'.'类型' = '月结'
-'服装外形'.'每月' = 171
-
-'交通物流'.'类型' = '月结'
-'交通物流'.'每月' = 145
-
-'医疗'.'类型' = '月结'
-'医疗'.'每月' = 26.95
-
-'日用消耗'.'类型' = '月结'
-'日用消耗'.'每月' = 23.25
-
-'赠礼'.'类型' = '月结'
-'赠礼'.'每月' = 23.15
-
-['预算'.'学习']
-# 付费软件，培训费，报名费，服务器
-'软件服务'.'类型' = '月结'
-'软件服务'.'每月' = 157
-# 资料费，买书，等等
-'文具资料'.'类型' = '月结'
-'文具资料'.'每月' = 28
-
-['预算'.'娱乐']
-'小说'.'类型' = '月结'
-'小说'.'每月' = 61.2
-
-'视频游戏'.'类型' = '月结'
-'视频游戏'.'每月' = 48
-
-'其它娱乐'.'类型' = '月结'
-'其它娱乐'.'每月' = 30
-
-['预算'.'数码']
-'主机'.'类型' = '月结'
-'主机'.'每月' = 346
-
-'配件'.'类型' = '月结'
-'配件'.'每月' = 18.79
-
-['预算'.'杂费']
-# 杂费都按日计算
-
-'洗衣'.'类型' = '季节'
-# 夏季的定义：6 7 8 9 月。
-'洗衣'.'在校'.'夏季' =0
-# 其余的月份都视为春秋季。
-'洗衣'.'在校'.'春秋' = 0
-# 冬季的定义：11 12 1 2 月。
-'洗衣'.'在校'.'冬季' = 0
+['饮食'.'零食冷饮']
+type = 'daily'
+value = { default = 0.55 }
 
 
+# 生活
+['生活'.'耐用品']
+type = 'daily'
+value = { default = 2.40 }
 
-'其他'.'类型' = '月结'
-'其他'.'每月' = 73
+['生活'.'服装外形']
+type = 'monthly'
+value = { default = 155 }
+
+['生活'.'房租']
+type = 'monthly'
+value = { default = 400 }
+
+['生活'.'交通物流']
+type = 'monthly'
+value = { default = 181 }
+
+['生活'.'医疗']
+type = 'monthly'
+value = { default = 35.91 }
+
+['生活'.'日用消耗']
+type = 'monthly'
+value = { default = 5.5 }
+
+['生活'.'赠礼']
+type = 'monthly'
+value = { default = 30.8 }
+
+
+# 学习
+['学习'.'软件服务']
+type = 'monthly'
+value = { default = 157 }
+
+['学习'.'文具资料']
+type = 'monthly'
+value = { default = 28 }
+
+
+# 娱乐
+['娱乐'.'小说']
+type = 'monthly'
+value = { default = 61.2 }
+
+['娱乐'.'视频游戏']
+type = 'monthly'
+value = { default = 50 }
+
+['娱乐'.'其它娱乐']
+type = 'monthly'
+value = { default = 33.05 }
+# TODO 设置分项支出报警前允许透支/盈余的最大数值
+
+
+# 数码
+['数码'.'主机']
+type = 'monthly'
+value = { default = 420 }
+
+['数码'.'配件']
+type = 'monthly'
+value = { default = 17.05 }
+
+# 杂费
+['杂费'.'洗衣']
+type = 'season'
+#夏季：6 7 8 9，春秋：3 4 5 10 ，冬季：11 12 1 2
+value = { 'hot' = 0, 'warm' = 0, 'cold' = 0 }
+
+['杂费'.'电力']
+type = 'monthly'
+value = { default = 0 }
+
+['杂费'.'通讯']
+type = 'monthly'
+value = { default = 73 }
+alias = ['其他']
