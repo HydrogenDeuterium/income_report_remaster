@@ -1,12 +1,11 @@
 import calendar
 import datetime
 import re
-from util import budget_fields
 
 from workalendar.asia import China
 
-from category import filter_input, MonthAndDays
-from util import smart_import
+from category import MonthAndDays, filter_input
+from util import budget_fields, smart_import
 
 
 def get_months(s: str) -> list[int]:
@@ -50,31 +49,37 @@ def get_month_days(yearmonth=None) -> (int, list[MonthAndDays]):
     # TODO 调整泛用性
     if len(months) == 1:
         m = months[0]
-        result_map={}
-        for i in budget_fields:
-            if i == 'default':
-                continue
-            text = filter_input(f'{m}月{i}天数')
-            result_map[i]=int(text)
+        result_map = {}
+        if __debug__:
+            result_map = {'home': 4, 'out': 27}
+        else:
+            for i in budget_fields:
+                if i == 'default':
+                    continue
+                text = filter_input(f'{m}月{i}天数')
+                result_map[i] = int(text)
 
-        result_map['default'] = get_months(m)-sum(result_map.values())
+        DAYS_IN_MONTHS = (..., 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+        result_map['default'] = DAYS_IN_MONTHS[m] - sum(result_map.values())
         month_and_dayses.append((m, result_map))
-    else:
-        for m in months:
-            ast: list[dict] = smart_import(f"{year}月报/{year[-2:]}{m:02}.md", "md")
-            try:
-                for _ in ast:
-                    if _['type'] == 'paragraph':
-                        text = _['children'][0]['raw']
-                        break
-                else:
-                    raise EOFError('输入的文件不正确')
-            except KeyError as e:
-                pass
-            search = re.search(r'本月共 ?(\d+) ?天，其中在校 (\d+) 天，在家 (\d+) 天。', text)
-            assert search
-            total, zaixiao, zaijia = map(int, search.groups())
-            month_and_dayses.append((m, {'default': total - zaixiao - zaijia, '在校': zaixiao, '在家': zaijia}))
+        return int(year), month_and_dayses
+
+    # len(months) > 1
+    for m in months:
+        ast: list[dict] = smart_import(f"{year}月报/{year[-2:]}{m:02}.md", "md")
+        try:
+            for _ in ast:
+                if _['type'] == 'paragraph':
+                    text = _['children'][0]['raw']
+                    break
+            else:
+                raise EOFError('输入的文件不正确')
+        except KeyError as e:
+            pass
+        search = re.search(r'本月共 ?(\d+) ?天，其中在校 (\d+) 天，在家 (\d+) 天。', text)
+        assert search
+        total, zaixiao, zaijia = map(int, search.groups())
+        month_and_dayses.append((m, {'default': total - zaixiao - zaijia, '在校': zaixiao, '在家': zaijia}))
 
     return int(year), month_and_dayses
 

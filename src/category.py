@@ -1,9 +1,10 @@
 from abc import abstractmethod
 from builtins import input
 from decimal import Decimal
+from logging import getLogger
 from typing import Sequence, TypeAlias, TypeVar
 
-import pytest
+logger = getLogger(__name__)
 
 Price = TypeVar("Price", Decimal, float, int)
 
@@ -13,7 +14,7 @@ def filter_input(*args, in_=input, **kwargs) -> str:
     while (ret := in_(*args, **kwargs)) == '' \
             or ret.startswith('#'):
         pass
-    return ret
+    return ret.strip()
 
 
 def get_season(month: int) -> str:
@@ -32,19 +33,12 @@ class BaseCategory:
     # 类别名称，上月结转，本月花费，本月预算，（至）下月结转
     # __slots__ = ['name', 'last', 'cost', 'budget', 'next']
 
+    @abstractmethod
     def __init__(self, name: str):
         self.name = name
         self.last = None
         self.cost = None
 
-    def __format__(self, format_spec='1'):
-        ret = f'- {self.name}: {self.cost} | {self.budget()} ' \
-              f'{self.last:+} = {self.next()}{self.advice(format_spec)}\n'
-
-        return ret
-
-    @pytest.mark.skipif(reason='abstract placeholder method')
-    # 防止 IDE 报 warning
     @abstractmethod
     def budget(self, *args):
         pass
@@ -75,21 +69,17 @@ class BaseCategory:
         return ''
 
 
-# 某个月的月份，以及不同工作条件下对应的日期数量
-# 不加 bound 为啥会报错捏？
-# MonthOutHome = TypeVar('MonthOutHome', bound=tuple[int, int, int])
-
 MonthAndDays: TypeAlias = tuple[int, dict[str, int]]
 
 
 # 子类别
 class SubCategory(BaseCategory):
     def __init__(self, name, rule, last=0, cost=None):
-        super().__init__(name)
+        self.name = name
         self.cache = None
-        if cost is not None:
-            self.cost = cost
+        self.cost = cost
         self.last = last
+        self.aliases = [self.name] + rule.pop('alias')
 
         # budget 计算 rule
         self.rule = rule
@@ -98,36 +88,34 @@ class SubCategory(BaseCategory):
         return f'<Subcategory {self.name}: {self.cost}|{self.last:+}>'
 
     def last(self, last_map):
-        for name in [self.name] + self.rule['alias']:
+        for name in self.aliases:
             if name in last_map:
                 self.last = last_map[name]
                 return
 
-    def init_cost(self):
-        price: str = filter_input(f'{self.name}:\n')
+    def cost(self, cost_map=None):
+        if cost_map is None:
+            price: str = filter_input(f'{self.name}:\n')
+        else:
+            for name in self.aliases:
+                if name in cost_map:
+                    price = cost_map[name]
+                    break
+            else:
+                logger.warning(f'{self.name} with alias {self.rule["alias"]} not found in cost_map')
+                price = filter_input(f'{self.name}:\n')
         # self.cost = Decimal(f'{Decimal(price):.2f}')
         self.cost = Decimal(price).quantize(Decimal('.01'))
 
     def budget_by_month(self, data: MonthAndDays):
         # 月份从 1 开始，不关心闰年
-        DAYS_IN_MONTHS = [..., 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+        DAYS_IN_MONTHS = (..., 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
 
-        # month, day_map = data
-        # ---DEBUG---
-        try:
-            month, day_map = data
-        # 处理 budget 中的旧版传参方式，修改后可去除 try
-        except ValueError:
-            day_map = {}
-            month, day_map['在家'], day_map['在校'] = data
+        month, day_map = data
 
-        for k, v in day_map.items():
-            day_map[k] = int(v)
+        # for k, v in day_map.items():
+        #     day_map[k] = int(v)
 
-        # try:
-        #     month, day_map = data
-        # except TypeError:
-        #     pass
         season = get_season(month)
 
         def dately(rule):
@@ -175,27 +163,10 @@ class SubCategory(BaseCategory):
                 ret_s += rule.get('default', 0) * default_days
             return ret_s
 
-        # 按四人同住计算，但怎么传入同住人数，目前没想好
-        def special(rule, n=4):
-            assert False, "暂时弃用"
-            # per_day = rule['基础']
-            # additional = rule.get(season)
-            # if additional:
-            #     # additional['算法'] like: 'n+2/n' or '6-n/n', ensured safe
-            #     extra = additional['在校'] * eval(additional['算法'], {'n': n})
-            #     # print(f'[DEBUG]{self.name}费用：基础：{per_day * out:.2f}，额外:{extra * out:.2f}')
-            #     per_day += extra
-            # else:
-            #     # print(f'[DEBUG]{self.name}费用：基础：{per_day * out:.2f}，额外: 0')
-            #     pass
-            # return per_day * out
-
         rule_map = {
             '月结': lambda rule: rule['每月'],
             '日结': dately,
-            '季节': seasonal,
-            '特殊': special
-        }
+            '季节': seasonal, }
 
         calculator = rule_map[self.rule['类型']]
         ret = Decimal(f'{calculator(self.rule):.2f}')
@@ -207,12 +178,10 @@ class SubCategory(BaseCategory):
 
     # @lru_cache
     def budget(self, days: MonthAndDays = None):
-        if not days:
+        if days is None:
             if self.cache is None:
                 raise AttributeError('No cache!')
-            else:
-                ret = self.cache
-                return ret
+            return self.cache
 
         if isinstance(days, (dict, tuple)):
             days = [days]
@@ -223,16 +192,22 @@ class SubCategory(BaseCategory):
 
         return ret
 
+    def __format__(self, format_spec='1'):
+        ret = f'- {self.name}: {self.cost} | {self.budget()} ' \
+              f'{self.last:+} = {self.next()}{self.advice(format_spec)}\n'
+
+        return ret
+
 
 # 最后一个 tuple 是给弱智类型检查擦屁股用的
-NameLastRuleCo: TypeAlias = tuple[str, Price, dict, Price] | tuple[str, Price, dict] \
-                            | tuple
+NameLastRuleCo: TypeAlias = tuple[str, Price, dict, Price] | tuple[str, Price, dict]
 
 
 # 大类别
 class Category(BaseCategory):
     def __init__(self, name, name_last_rule: Sequence[NameLastRuleCo]):
-        super().__init__(name)
+        self.name = name
+        self.cost = None
         self.subs = [SubCategory(name, value) for name, value in name_last_rule.items()]
         self.last = sum(_.last for _ in self.subs)
 
