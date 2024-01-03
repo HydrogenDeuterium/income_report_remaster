@@ -79,7 +79,10 @@ class SubCategory(BaseCategory):
         self.cache = None
         self.cost = cost
         self.last = last
-        self.aliases = [self.name] + rule.pop('alias')
+
+        self.aliases = [self.name]
+        if 'alias' in rule:
+            self.aliases += rule.pop('alias')
 
         # budget 计算 rule
         self.rule = rule
@@ -87,13 +90,13 @@ class SubCategory(BaseCategory):
     def __repr__(self):
         return f'<Subcategory {self.name}: {self.cost}|{self.last:+}>'
 
-    def last(self, last_map):
+    def set_last(self, last_map):
         for name in self.aliases:
             if name in last_map:
                 self.last = last_map[name]
                 return
 
-    def cost(self, cost_map=None):
+    def set_cost(self, cost_map=None):
         if cost_map is None:
             price: str = filter_input(f'{self.name}:\n')
         else:
@@ -102,7 +105,7 @@ class SubCategory(BaseCategory):
                     price = cost_map[name]
                     break
             else:
-                logger.warning(f'{self.name} with alias {self.rule["alias"]} not found in cost_map')
+                logger.warning(f'{self.name} with alias {self.aliases} not found in cost_map')
                 price = filter_input(f'{self.name}:\n')
         # self.cost = Decimal(f'{Decimal(price):.2f}')
         self.cost = Decimal(price).quantize(Decimal('.01'))
