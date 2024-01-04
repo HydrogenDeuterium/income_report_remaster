@@ -1,5 +1,7 @@
 from copy import deepcopy
 
+import pytest
+
 from src.category import *
 from src.util import smart_import
 

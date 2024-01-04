@@ -126,7 +126,7 @@ class SubCategory(BaseCategory):
             for k, v in day_map.items():
                 # ret_d += rule[k] * v
                 try:
-                    ret_d += rule[k] * v
+                    ret_d += rule['value'].get(k, 0) * v
                 except KeyError:
                     if 'default' in rule:
                         ret_d += rule['default'] * v
@@ -167,11 +167,11 @@ class SubCategory(BaseCategory):
             return ret_s
 
         rule_map = {
-            '月结': lambda rule: rule['每月'],
-            '日结': dately,
-            '季节': seasonal, }
+            'monthly': lambda rule: rule['value'],
+            'daily': dately,
+            'season': seasonal, }
 
-        calculator = rule_map[self.rule['类型']]
+        calculator = rule_map[self.rule['type']]
         ret = Decimal(f'{calculator(self.rule):.2f}')
         # try:
         #     ret = Decimal(f'{calculator(self.rule):.2f}')

@@ -33,15 +33,15 @@ value = { default = 2.40 }
 
 ['生活'.'服装外形']
 type = 'monthly'
-value = { default = 155 }
+value = 155
 
 ['生活'.'房租']
 type = 'monthly'
-value = { default = 400 }
+value = 400
 
 ['生活'.'交通物流']
 type = 'monthly'
-value = { default = 181 }
+value = 181
 
 ['生活'.'医疗']
 type = 'monthly'
@@ -59,11 +59,11 @@ value = { default = 30.8 }
 # 学习
 ['学习'.'软件服务']
 type = 'monthly'
-value = { default = 157 }
+value = 157
 
 ['学习'.'文具资料']
 type = 'monthly'
-value = { default = 28 }
+value = 28
 
 
 # 娱乐
@@ -73,7 +73,7 @@ value = { default = 61.2 }
 
 ['娱乐'.'视频游戏']
 type = 'monthly'
-value = { default = 50 }
+value = 50
 
 ['娱乐'.'其它娱乐']
 type = 'monthly'
@@ -84,7 +84,7 @@ value = { default = 33.05 }
 # 数码
 ['数码'.'主机']
 type = 'monthly'
-value = { default = 420 }
+value = 420
 
 ['数码'.'配件']
 type = 'monthly'
@@ -98,9 +98,9 @@ value = { 'hot' = 0, 'warm' = 0, 'cold' = 0 }
 
 ['杂费'.'电力']
 type = 'monthly'
-value = { default = 0 }
+value = 0
 
 ['杂费'.'通讯']
 type = 'monthly'
-value = { default = 73 }
+value = 73
 alias = ['其他']

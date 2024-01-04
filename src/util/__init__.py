@@ -13,7 +13,6 @@ from category import Category
 file_dir = r"C:\Users\Deu\OneDrive\Projects\Python\income_report_data"
 
 
-
 def get_last(last_year: int, last_month) -> defaultdict[Any, Type[Decimal]] | dict[Any, Decimal]:
     """依赖上月月报格式获取各子项上月结余"""
     filename = f'{last_year}月报/{last_year % 100}{last_month :0>2}.md'
@@ -21,12 +20,12 @@ def get_last(last_year: int, last_month) -> defaultdict[Any, Type[Decimal]] | di
         data_ = smart_import(filename, 'md')
     except FileNotFoundError:
         return defaultdict(Decimal)
-    
+
     s: list = data_[-1]['children']
     subs = []
     for i in s[:-1]:
         subs += i['children'][1]['children']
-    
+
     a = [sub['children'][0]['children'][0]['raw'] for sub in subs]
     ret = defaultdict(Decimal)
     for ss in a:
@@ -44,7 +43,7 @@ def smart_import(filename, ext=None) -> str | dict | list[dict]:
     """
     if ext is None and len(filename.split('.')) == 2:
         ext = filename.split('.')[-1]
-    
+
     @contextlib.contextmanager
     def smart_open(filename_, *args, **kwargs):
         prefixes = file_dir, "../", "", 'test/'
@@ -59,7 +58,7 @@ def smart_import(filename, ext=None) -> str | dict | list[dict]:
             raise FileNotFoundError(filename_)
         yield f_
         f_.close()
-    
+
     match ext:
         case 'toml':
             with smart_open(filename, 'rb') as f:
@@ -80,9 +79,9 @@ def get_structure(last_year: int, last_month: int, toml='./budget.toml', *, test
         items_budgets: dict[str, dict[str, dict]] = smart_import(toml, ext='toml')['预算']
     except FileNotFoundError:
         items_budgets: dict[str, dict[str, dict]] = smart_import('budget/budget.toml', ext='toml')['预算']
-    
+
     last_data = get_last(last_year, last_month)
-    
+
     categories = []
     for category_name, dict_subcategory in items_budgets.items():
         name_last_rule_cos = [(name, last_data[name], rule,)
@@ -91,10 +90,10 @@ def get_structure(last_year: int, last_month: int, toml='./budget.toml', *, test
         if test:
             name_last_rule_cos = [
                 (x + (Decimal('10'),)) for x in name_last_rule_cos]
-        
+
         cat = Category(category_name, name_last_rule_cos)
         categories.append(cat)
-    
+
     return categories
 
 

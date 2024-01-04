@@ -63,5 +63,6 @@ for c in categories:
     for s in c.subs:
         s.set_last(last_data)
         s.set_cost(cost_data)
+        s.budget_by_month(months_and_days[0])
 
 pass
