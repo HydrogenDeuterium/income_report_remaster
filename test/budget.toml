@@ -45,15 +45,15 @@ value = 181
 
 ['生活'.'医疗']
 type = 'monthly'
-value = { default = 35.91 }
+value = 35.91
 
 ['生活'.'日用消耗']
 type = 'monthly'
-value = { default = 5.5 }
+value = 5.5
 
 ['生活'.'赠礼']
 type = 'monthly'
-value = { default = 30.8 }
+value = 30.8
 
 
 # 学习
@@ -69,7 +69,7 @@ value = 28
 # 娱乐
 ['娱乐'.'小说']
 type = 'monthly'
-value = { default = 61.2 }
+value = 61.2
 
 ['娱乐'.'视频游戏']
 type = 'monthly'
@@ -77,7 +77,7 @@ value = 50
 
 ['娱乐'.'其它娱乐']
 type = 'monthly'
-value = { default = 33.05 }
+value = 33.05
 # TODO 设置分项支出报警前允许透支/盈余的最大数值
 
 
@@ -88,7 +88,7 @@ value = 420
 
 ['数码'.'配件']
 type = 'monthly'
-value = { default = 17.05 }
+value = 17.05
 
 # 杂费
 ['杂费'.'洗衣']
