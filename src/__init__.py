@@ -51,7 +51,8 @@ if __debug__:
         '配件':     Decimal('131.68'),
         '洗衣':     Decimal('31.30'),
         '电力':     Decimal('1100.50'),
-        '其他':     Decimal('56.55')
+        '其他':     Decimal('56.55'),
+        '房租':     Decimal('10000.00')
     }
 else:
     last_data = util.get_last(last_year, last_month)
@@ -63,6 +64,17 @@ for c in categories:
     for s in c.subs:
         s.set_last(last_data)
         s.set_cost(cost_data)
-        s.budget_by_month(months_and_days[0])
+        s.budget(months_and_days[0])
 
+total = ','.join(str(sum(j.values())) for i,j in months_and_days)
+mul = {1: '1', 3: '1.7', 12: '3.5'}[len(months_and_days)]
+budget_text = ''.join(c.__format__( mul) for c in categories)
+
+template = util.get_template("季报表头.md")
+head = template.render(
+    year=year,
+    month='Q4',
+    total=total,
+    fenxiangzhichu=budget_text,
+    categories=categories)
 pass

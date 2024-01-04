@@ -168,8 +168,8 @@ class SubCategory(BaseCategory):
 
         rule_map = {
             'monthly': lambda rule: rule['value'],
-            'daily': dately,
-            'season': seasonal, }
+            'daily':   dately,
+            'season':  seasonal, }
 
         calculator = rule_map[self.rule['type']]
         ret = Decimal(f'{calculator(self.rule):.2f}')
@@ -244,7 +244,8 @@ class Category(BaseCategory):
         # \t- sub_xxx1'''
         # \t- sub_xxx2
         # \t- sub_xxx3
-        # Pycharm 有 bug，会认为 __format__() 要传入 str
-        # return '\n\t'.join(map(BaseCategory.__format__, base_categories))
-        ret = '\t'.join(map(lambda x: BaseCategory.__format__(x, format_spec), base_categories))
+        formats = [f'- {self.name}: {self.cost} | {self.budget()} '
+                   f'{self.last:+} = {self.next()}{self.advice(format_spec)}\n']
+        formats += [format(sub, format_spec) for sub in self.subs]
+        ret = '\t'.join(formats)
         return ret
