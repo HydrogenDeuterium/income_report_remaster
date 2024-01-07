@@ -106,6 +106,6 @@ def get_template(filename):
             "../template")).get_template(filename)
 
 
-budget_data = smart_import('../test/budget.toml', ext='toml')
+budget_data = smart_import('./budget.toml', ext='toml')
 budget_version = budget_data.pop('__version')
 budget_fields = budget_data.pop('__fields')
