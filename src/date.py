@@ -38,14 +38,14 @@ def get_month_days(yearmonth=None) -> (int, list[MonthAndDays]):
     # 20yr->20+yr 20Q1->20+q1,2011->20+11
     yearmonth = re.search(r"(\d{4})(\d{2}|[qQ][1-4]|[yY][rR])", text)
     assert yearmonth, "输入格式不正确！"
-
+    
     year = yearmonth.groups()[0]
-
+    
     # 注意，月份从 1 开始！
     months = get_months(yearmonth.groups()[1])
-
+    
     month_and_dayses: list[MonthAndDays] = []
-
+    
     # TODO 调整泛用性
     if len(months) == 1:
         m = months[0]
@@ -58,12 +58,12 @@ def get_month_days(yearmonth=None) -> (int, list[MonthAndDays]):
                     continue
                 text = filter_input(f'{m}月{i}天数')
                 result_map[i] = int(text)
-
+        
         DAYS_IN_MONTHS = (..., 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
         result_map['default'] = DAYS_IN_MONTHS[m] - sum(result_map.values())
         month_and_dayses.append((m, result_map))
         return int(year), month_and_dayses
-
+    
     # len(months) > 1
     for m in months:
         ast: list[dict] = smart_import(f"{year}月报/{year[-2:]}{m:02}.md", "md")
@@ -80,7 +80,7 @@ def get_month_days(yearmonth=None) -> (int, list[MonthAndDays]):
         assert search
         total, zaixiao, zaijia = map(int, search.groups())
         month_and_dayses.append((m, {'default': total - zaixiao - zaijia, '在校': zaixiao, '在家': zaijia}))
-
+    
     return int(year), month_and_dayses
 
 
@@ -88,15 +88,15 @@ def get_working_days(year, month, cal=China()):
     """基于 worklender 计算月内的工作日数量"""
     # 获取该月的第一天和最后一天的星期几和天数
     _, days_in_month = calendar.monthrange(year, month)
-
+    
     # 获取该月的第一天和最后一天
     start_date = datetime.date(year, month, 1)
     end_date = datetime.date(year, month, days_in_month)
-
+    
     # 计算两个日期之间的工作日数量
     # from workalendar.asia import China
     working_days = cal.get_working_days_delta(start_date, end_date)
-
+    
     # 返回工作日数量
     return working_days
 
@@ -104,7 +104,7 @@ def get_working_days(year, month, cal=China()):
 def get_next(last_month_out_homes: list[MonthAndDays]) -> list[tuple]:
     """预测下一个时间段（月，季，年）在家在校天数"""
     # TODO 调整泛用性
-
+    
     out_map: dict[int, tuple[int, int]] = {
         1: (23, 8), 2: (16, 12), 3: (31, 0), 4: (30, 0), 5: (31, 0), 6: (30, 0),
         7: (25, 6), 8: (5, 26), 9: (30, 0), 10: (28, 3), 11: (30, 0), 12: (31, 0),
@@ -114,5 +114,9 @@ def get_next(last_month_out_homes: list[MonthAndDays]) -> list[tuple]:
     for i, j in enumerate(last_month_out_homes):
         new_month = (last_month_ + i) % 12 + 1
         # ret.append(tuple([new_month] + out_map[new_month]))
-        ret.append((new_month, *out_map[new_month]))
+        ret.append(
+            (new_month,
+             {'out':  out_map[new_month][0],
+              'home': out_map[new_month][1]
+              }))
     return ret
