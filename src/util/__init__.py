@@ -68,7 +68,7 @@ def smart_import(filename, ext=None) -> str | dict | list[dict]:
             with smart_open(filename, encoding='utf-8') as f:
                 return parser(f.read())
         case _:
-            with open(filename, encoding="utf-8") as f:
+            with smart_open(filename, encoding="utf-8") as f:
                 data_ = f.read()
             return data_
 
@@ -106,6 +106,6 @@ def get_template(filename):
             "../template")).get_template(filename)
 
 
-budget_data = smart_import('./budget.toml', ext='toml')
+budget_data = smart_import('budget\\budget.toml', ext='toml')
 budget_version = budget_data.pop('__version')
 budget_fields = budget_data.pop('__fields')

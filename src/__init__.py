@@ -10,16 +10,21 @@ from date import get_next
 from util.date import get_month_days
 
 import sys
+import argparse
 
-if sys.argv[1] == 'file':
-    pass
+parser = argparse.ArgumentParser()
+parser.add_argument('--file', '-f', metavar='FILENAME', type=str,
+                    default=None, required=False)
+file = parser.parse_args().file
+# if sys.argv[1] == 'file':
+#     pass
 
-year, months_and_days = get_month_days('2023Q4')
+year, months_and_days = get_month_days('2023YR')
 last_month = (months_and_days[0][0] - 2) % 12 + 1
 last_year = year - int(last_month == 12)
 
 # TODO 根据参数从文件或 stdin 读取
-if __debug__:
+if __debug__ and False:
     cost_data = {
         '吃饭':     Decimal('3050.80'),
         '饮料':     Decimal('388.13'),
@@ -48,8 +53,13 @@ if __debug__:
         '电力':     Decimal('346.19'),
         '其他':     Decimal('264.59'),
     }
+elif file is not None:
+    data = util.smart_import(file)
+    pass
 else:
-    cost_data = {k: filter_input(k) for k in util.budget_data.keys()}
+    cost_data = {}
+    for v in util.budget_data.values():
+        cost_data |= {k:Decimal( filter_input(k)) for k in v.keys()}
 
 last_data = util.get_last(last_year, last_month)
 categories = [Category(k, v) for k, v in util.budget_data.items()]

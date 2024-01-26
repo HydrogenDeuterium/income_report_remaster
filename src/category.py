@@ -129,14 +129,18 @@ class SubCategory:
             return ret_s
         
         rule_map = {
-            'monthly': lambda rule: rule['value'],
+            'monthly': lambda rule: rule['value']['default'],
             'daily':   dately,
             'season':  seasonal,
         }
         
         rule = self.rule
         calculator = rule_map[rule['type']]
-        ret = Decimal(f'{calculator(rule):.2f}')
+        try:
+            ret = Decimal(f'{calculator(rule):.2f}')
+        except TypeError as e:
+            print(rule)
+            raise e
         return ret
     
     # @lru_cache
