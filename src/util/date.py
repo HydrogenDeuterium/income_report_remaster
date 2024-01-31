@@ -1,4 +1,5 @@
 import re
+import typing
 
 from category import filter_input, MonthAndDays
 from util import budget_fields, smart_import
@@ -68,8 +69,8 @@ def get_month_days(yearmonth=None, *, _input=filter_input) -> (int, list[MonthAn
                 text = filter_input(f'{m}月{i}天数')
                 result_map[i] = int(text)
         
-        DAYS_IN_MONTHS = (..., 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
-        result_map['default'] = DAYS_IN_MONTHS[m] - sum(result_map.values())
+        _DAYS_IN_MONTHS = (..., 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+        result_map['default'] = _DAYS_IN_MONTHS[m] - sum(result_map.values())
         month_and_dayses.append((m, result_map))
         return int(year), month_and_dayses
     

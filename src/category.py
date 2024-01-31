@@ -5,8 +5,8 @@ from typing import Sequence, TypeAlias, TypeVar
 
 logger = getLogger(__name__)
 
-Price = TypeVar("Price", Decimal, float, int)
 
+Price = TypeVar("Price", Decimal, float, int)
 
 def filter_input(*args, in_=input, **kwargs) -> str:
     """过滤输入中的空行和井号开头的行。注意空格后带井号不会被过滤。"""
@@ -19,11 +19,11 @@ def filter_input(*args, in_=input, **kwargs) -> str:
 def get_season(month: int) -> str:
     match month:
         case 6 | 7 | 8 | 9:
-            return '夏季'
+            return 'hot'
         case 10 | 3 | 4 | 5:
-            return '春秋'
+            return 'warm'
         case 11 | 12 | 1 | 2:
-            return '冬季'
+            return 'cold'
         case _:
             raise AssertionError(f'月份错误:{month=},应为1-12!')
 
@@ -76,7 +76,7 @@ class SubCategory:
     
     def budget_by_month(self, data: MonthAndDays):
         # 月份从 1 开始，不关心闰年
-        DAYS_IN_MONTHS = (..., 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+        _DAYS_IN_MONTHS = (..., 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
         try:
             month, day_map = data
         except ValueError as e:
@@ -98,7 +98,7 @@ class SubCategory:
                     print(f'[WARNING]试图请求未设置的默认值：{rule}')
             
             if 'default' not in day_map:
-                default_days = DAYS_IN_MONTHS[month] - sum(day_map.values())
+                default_days = _DAYS_IN_MONTHS[month] - sum(day_map.values())
                 assert default_days >= 0
                 # print(f'[WARNING]试图请求未设置的默认值：{rule}')
             
@@ -113,7 +113,7 @@ class SubCategory:
                     # ret_s += rule.get(k, 0) * v
                     try:
                         # 感觉这里类型标注是有点问题的
-                        budget: Price = rule.get(k, 0)
+                        budget: Price = rule['value'].get(k, 0)
                         if isinstance(budget, dict):
                             budget = budget[season]
                         ret_s += budget * v
@@ -121,7 +121,7 @@ class SubCategory:
                         pass
                     except TypeError:
                         pass
-            default_days = day_map.get('default') or DAYS_IN_MONTHS[month] - sum(day_map.values())
+            default_days = day_map.get('default') or _DAYS_IN_MONTHS[month] - sum(day_map.values())
             try:
                 ret_s += rule['default'][season] * default_days
             except KeyError:

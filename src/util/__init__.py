@@ -86,10 +86,7 @@ def get_structure(last_year: int, last_month: int, toml='./budget.toml', *, test
     for category_name, dict_subcategory in items_budgets.items():
         name_last_rule_cos = [(name, last_data[name], rule,)
                               for name, rule in dict_subcategory.items()]
-        # 写给测试用
-        if test:
-            name_last_rule_cos = [
-                (x + (Decimal('10'),)) for x in name_last_rule_cos]
+
 
         cat = Category(category_name, name_last_rule_cos)
         categories.append(cat)

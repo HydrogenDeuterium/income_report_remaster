@@ -26,8 +26,8 @@ def test_get_month():
 
 def test_get_month_days():
     with pytest.raises(AssertionError):
-        get_month_days('!@#$%^&', test=True)
-    assert get_month_days('2022yr', test=True) == (2022, [
+        get_month_days('!@#$%^&')
+    assert get_month_days('2022yr') == (2022, [
         (1, {'default': 0, '在家': 8, '在校': 23}),
         (2, {'default': 0, '在家': 28, '在校': 0}),
         (3, {'default': 0, '在家': 0, '在校': 31}),

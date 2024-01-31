@@ -1,16 +1,14 @@
+import argparse
 import os
 import shutil
-from os.path import join as opj
 from copy import deepcopy
 from decimal import Decimal
+from os.path import join as opj
 
 import util
 from category import Category, filter_input
 from date import get_next
 from util.date import get_month_days
-
-import sys
-import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--file', '-f', metavar='FILENAME', type=str,
@@ -24,42 +22,23 @@ last_month = (months_and_days[0][0] - 2) % 12 + 1
 last_year = year - int(last_month == 12)
 
 # TODO 根据参数从文件或 stdin 读取
-if __debug__ and False:
-    cost_data = {
-        '吃饭':     Decimal('3050.80'),
-        '饮料':     Decimal('388.13'),
-        '水果牛奶': Decimal('251.97'),
-        '零食冷饮': Decimal('270.23'),
-        
-        '耐用品':   Decimal('1722.31'),
-        '服装外形': Decimal('1401.70'),
-        '交通物流': Decimal('793.94'),
-        '医疗':     Decimal('215'),
-        '日用消耗': Decimal('120.9'),
-        '赠礼':     Decimal('904'),
-        '房租':     Decimal('293.33'),
-        
-        '软件服务': Decimal('257.1'),
-        '文具资料': Decimal('1'),
-        
-        '小说':     Decimal('258'),
-        '视频游戏': Decimal('445.5'),
-        '其它娱乐': Decimal('671.32'),
-        
-        '主机':     Decimal('4506.89'),
-        '配件':     Decimal('17.8'),
-        
-        '洗衣':     Decimal('0'),
-        '电力':     Decimal('346.19'),
-        '其他':     Decimal('264.59'),
-    }
-elif file is not None:
+if file is not None:
     data = util.smart_import(file)
-    pass
-else:
+    lines = [line for line in data.splitlines() if not line.startswith('#')]
+    line_iter = iter(lines)
+    
+    yearmonth = next(line_iter)
+    year, months_and_days = get_month_days(yearmonth)
+    
+    days = next(line_iter)
     cost_data = {}
     for v in util.budget_data.values():
-        cost_data |= {k:Decimal( filter_input(k)) for k in v.keys()}
+        cost_data |= {k: Decimal(next(line_iter)) for k in v.keys()}
+else:
+    yearmonth = filter_input()
+    cost_data = {}
+    for v in util.budget_data.values():
+        cost_data |= {k: Decimal(filter_input(k)) for k in v.keys()}
 
 last_data = util.get_last(last_year, last_month)
 categories = [Category(k, v) for k, v in util.budget_data.items()]
@@ -74,10 +53,18 @@ total = ','.join(str(sum(j.values())) for i, j in months_and_days)
 mul = {1: '1', 3: '1.7', 12: '3.5'}[len(months_and_days)]
 budget_text = ''.join(c.__format__(mul) for c in categories)
 
-template = util.get_template("季报表头.md")
+if len(months_and_days) == 1:
+    template = util.get_template("月报表头.md")
+elif len(months_and_days) == 3:
+    template = util.get_template("季报表头.md")
+elif len(months_and_days) == 12:
+    template = util.get_template("年报表头.md")
+else:
+    raise ValueError("len(months_and_days) must be 1, 3 or 12")
+
 head = template.render(
     year=year,
-    month='Q4',
+    month=yearmonth[-2:],
     total=total,
     fenxiangzhichu=budget_text,
     categories=categories)
