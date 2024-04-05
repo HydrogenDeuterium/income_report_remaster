@@ -76,7 +76,7 @@ def get_month_days(yearmonth=None, *, _input=filter_input) -> (int, list[MonthAn
     
     # len(months) > 1
     for m in months:
-        ast: list[dict] = smart_import(f"{year}月报/{year%100}{m:02}.md", "md")
+        ast: list[dict] = smart_import(f"{year}月报/{year % 100}{m:02}.md", "md")
         try:
             for _ in ast:
                 if _['type'] == 'paragraph':
@@ -86,9 +86,9 @@ def get_month_days(yearmonth=None, *, _input=filter_input) -> (int, list[MonthAn
                 raise EOFError('输入的文件不正确')
         except KeyError as e:
             raise e
-        search = re.search(r'本月共 ?(\d+) ?天，其中在校 (\d+) 天，在家 (\d+) 天。', text)
+        search = re.search(r'本月共 ?(\d+) ?天，其中在校 (\d?) 天，在家 (\d?) 天。', text)
         assert search
-        total, zaixiao, zaijia = map(int, search.groups())
+        total, zaixiao, zaijia = [int(i) if i else 0 for i in search.groups()]
         month_and_dayses.append((m, {'default': total - zaixiao - zaijia, 'out': zaixiao, 'home': zaijia}))
     
     return int(year), month_and_dayses

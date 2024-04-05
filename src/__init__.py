@@ -17,7 +17,7 @@ file = parser.parse_args().file
 # if sys.argv[1] == 'file':
 #     pass
 
-year, months_and_days = get_month_days('2023YR')
+year, months_and_days = get_month_days('2024Q1')
 last_month = (months_and_days[0][0] - 2) % 12 + 1
 last_year = year - int(last_month == 12)
 
