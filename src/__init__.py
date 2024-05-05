@@ -17,10 +17,6 @@ file = parser.parse_args().file
 # if sys.argv[1] == 'file':
 #     pass
 
-year, months_and_days = get_month_days('2024Q1')
-last_month = (months_and_days[0][0] - 2) % 12 + 1
-last_year = year - int(last_month == 12)
-
 # TODO 根据参数从文件或 stdin 读取
 if file is not None:
     data = util.smart_import(file)
@@ -39,6 +35,10 @@ else:
     cost_data = {}
     for v in util.budget_data.values():
         cost_data |= {k: Decimal(filter_input(k)) for k in v.keys()}
+        
+year, months_and_days = get_month_days(yearmonth)
+last_month = (months_and_days[0][0] - 2) % 12 + 1
+last_year = year - int(last_month == 12)
 
 last_data = util.get_last(last_year, last_month)
 categories = [Category(k, v) for k, v in util.budget_data.items()]
