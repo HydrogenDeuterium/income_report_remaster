@@ -20,12 +20,24 @@ def get_last(last_year: int, last_month) -> defaultdict[Any, Type[Decimal]] | di
         data_ = smart_import(filename, 'md')
     except FileNotFoundError:
         return defaultdict(Decimal)
-
-    s: list = data_[-1]['children']
+    
+    for i in data_[-2::-1]:
+        i_type = i['type']
+        if i_type != 'list':
+            continue
+        s: list = i['children']
+        break
+    else:
+        raise ValueError('incorrect markdown struct!')
     subs = []
+    
     for i in s[:-1]:
-        subs += i['children'][1]['children']
-
+        try:
+            subs += i['children'][1]['children']
+        except IndexError:
+            pass
+            pass
+    
     a = [sub['children'][0]['children'][0]['raw'] for sub in subs]
     ret = defaultdict(Decimal)
     for ss in a:
@@ -43,7 +55,7 @@ def smart_import(filename, ext=None) -> str | dict | list[dict]:
     """
     if ext is None and len(filename.split('.')) == 2:
         ext = filename.split('.')[-1]
-
+    
     @contextlib.contextmanager
     def smart_open(filename_, *args, **kwargs):
         prefixes = file_dir, "../", "", 'test/'
@@ -58,7 +70,7 @@ def smart_import(filename, ext=None) -> str | dict | list[dict]:
             raise FileNotFoundError(filename_)
         yield f_
         f_.close()
-
+    
     match ext:
         case 'toml':
             with smart_open(filename, 'rb') as f:
@@ -79,18 +91,17 @@ def get_structure(last_year: int, last_month: int, toml='./budget.toml', *, test
         items_budgets: dict[str, dict[str, dict]] = smart_import(toml, ext='toml')['预算']
     except FileNotFoundError:
         items_budgets: dict[str, dict[str, dict]] = smart_import('budget/budget.toml', ext='toml')['预算']
-
+    
     last_data = get_last(last_year, last_month)
-
+    
     categories = []
     for category_name, dict_subcategory in items_budgets.items():
         name_last_rule_cos = [(name, last_data[name], rule,)
                               for name, rule in dict_subcategory.items()]
-
-
+        
         cat = Category(category_name, name_last_rule_cos)
         categories.append(cat)
-
+    
     return categories
 
 
