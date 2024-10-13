@@ -21,14 +21,18 @@ def get_last(last_year: int, last_month) -> defaultdict[Any, Type[Decimal]] | di
     except FileNotFoundError:
         return defaultdict(Decimal)
     
-    for i in data_[-2::-1]:
-        i_type = i['type']
-        if i_type != 'list':
-            continue
-        s: list = i['children']
-        break
+    if (last_year,last_month)>=(2024,8):
+        for i in data_[-2::-1]:
+            i_type = i['type']
+            if i_type != 'list':
+                continue
+            s: list = i['children']
+            break
+        else:
+            raise ValueError('incorrect markdown struct!')
     else:
-        raise ValueError('incorrect markdown struct!')
+        s: list = data_[-1]['children']
+    
     subs = []
     
     for i in s[:-1]:
