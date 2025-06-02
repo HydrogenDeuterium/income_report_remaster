@@ -112,10 +112,15 @@ def get_structure(last_year: int, last_month: int, toml='./budget.toml', *, test
 def get_template(filename):
     try:
         return jinja2.Environment(loader=jinja2.FileSystemLoader(
-            "./template")).get_template(filename)
+            "E:/JetbrainsProject/PyCharm/income_report_remaster/template")).get_template(filename)
     except jinja2.exceptions.TemplateNotFound:
-        return jinja2.Environment(loader=jinja2.FileSystemLoader(
-            "../template")).get_template(filename)
+        try:
+            return jinja2.Environment(loader=jinja2.FileSystemLoader(
+                "../template")).get_template(filename)
+        except jinja2.exceptions.TemplateNotFound:
+            return jinja2.Environment(loader=jinja2.FileSystemLoader(
+                "./template")).get_template(filename)
+
 
 
 budget_data = smart_import('budget\\budget.toml', ext='toml')
