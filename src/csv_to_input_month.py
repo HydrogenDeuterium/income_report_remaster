@@ -117,7 +117,7 @@ def get_category_value(reader):
 if __name__ == '__main__':
     # 使用示例文件路径
     input_root = Path(r'C:\Users\Deu\OneDrive\Projects\Python\income_report_data')
-    reletive_path = Path(r'2025月报/QianJi_日常生活_2025-07-06_224918.csv')
+    reletive_path = Path(r'2025月报/QianJi_日常生活_2025-07-31_231300.csv')
     file_path = input_root / reletive_path
     output_file = analyze_csv(file_path, input_root)
     print(f'分析完成，结果已保存至：{output_file}')
