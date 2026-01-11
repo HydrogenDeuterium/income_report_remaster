@@ -1,4 +1,5 @@
 import argparse
+import decimal
 import os
 import shutil
 from copy import deepcopy
@@ -29,13 +30,19 @@ if file is not None:
     days = next(line_iter)
     cost_data = {}
     for v in util.budget_data.values():
-        cost_data |= {k: Decimal(next(line_iter)) for k in v.keys()}
+        for k in v.keys():
+            value = next(line_iter)
+            try:
+                cost_data[k] = Decimal(value)
+            except decimal.InvalidOperation:
+                print(f'format error:{value} is not a valid  decimal')
+                raise
 else:
     yearmonth = filter_input()
     cost_data = {}
     for v in util.budget_data.values():
         cost_data |= {k: Decimal(filter_input(k)) for k in v.keys()}
-        
+
 year, months_and_days = get_month_days(yearmonth)
 last_month = (months_and_days[0][0] - 2) % 12 + 1
 last_year = year - int(last_month == 12)
